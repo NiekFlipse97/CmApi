@@ -23,7 +23,10 @@
     "boxen": "^2.0.0",
     "chai": "^4.2.0",
     "express": "^4.16.4",
+    "jwt-simple": "^0.5.5",
     "mocha": "^5.2.0",
+    "moment": "^2.23.0",
+    "mongo-sql": "^6.2.0",
     "mongoose": "^5.4.0",
     "nodemon": "^1.18.9"
   }
