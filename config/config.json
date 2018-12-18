@@ -1,0 +1,9 @@
+
+{
+    "port": 8080,
+    "databases": {
+        "mongo": "mongodb://localhost/cm_mongo",
+        "mongotest": "mongodb://localhost/cm_mongo_test"
+    },
+    "secret": "GpsNX9PqESH6etkF"
+}
