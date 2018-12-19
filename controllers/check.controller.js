@@ -16,7 +16,7 @@ module.exports = {
 
         let query = {
             type: 'select',
-            table: 'checks',
+            table: 'payments',
             where: req.body.condition
         };
         let sqlStatement = MongoSQL.sql(query).toString();
