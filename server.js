@@ -23,11 +23,12 @@ console.log(boxen('CM API', {
 app.use(bodyParser.json())
 
 // Route files
+const checkRoutes = require('./routes/check.routes')
 
 
 // Routes
 app.get('/', (req, res) => res.send('Hello World!'))
-app.use('/api', require('./routes/check.routes'));
+app.use('/checks', checkRoutes)
 
 // Catch 404's
 // app.use('*', function (req, res) {
