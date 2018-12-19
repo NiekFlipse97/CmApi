@@ -22,12 +22,18 @@ console.log(boxen('CM API', {
 // Use
 app.use(bodyParser.json())
 
+//CORS
+var cors = require('cors')
+app.use(cors())
+
 // Route files
+const authRoutes = require('./routes/auth.routes')
 const checkRoutes = require('./routes/check.routes')
 
 
 // Routes
 app.get('/', (req, res) => res.send('Hello World!'))
+app.use('/auth', authRoutes)
 app.use('/checks', checkRoutes)
 
 // Catch 404's
