@@ -20,9 +20,10 @@ module.exports = {
             where: req.body.condition
         };
         let sqlStatement = MongoSQL.sql(query);
-        console.log(`Statement: ${createQuery(sqlStatement)}`);
-        //if(new RegExp(".*(drop|alter|insert)+.*").test(sqlStatement))
-        //    return res.status(400).json(new Error("invalid condition", 400));
+        if(new RegExp(".*(drop|alter|insert)+.*").test(sqlStatement.toString()))
+            return res.status(400).json(new Error("invalid condition", 400));
+        let sqlQuery = createQuery(sqlStatement);
+        check.sqlStatement = sqlQuery;
 
         /** TEST QUERY ON ACTUAL DATABASE TO VERIFY VIABILITY OF CONDITION **/
 
