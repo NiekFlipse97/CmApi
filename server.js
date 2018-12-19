@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const boxen = require('boxen');
 const app = express()
+const mongodb = require('./databases/mongodb')
 
 // Config
 const config = require('./config/config.json')
@@ -17,21 +18,6 @@ console.log(boxen('CM API', {
     margin: 1,
     borderStyle: 'double'
 }))
-
-// Mongoose
-var mongoose = require('mongoose')
-
-// mongoose.connect(config.databases.mongo, {
-//     useNewUrlParser: true
-// })
-
-var db = mongoose.connection
-
-db.on('error', console.error.bind(console, 'Could not connect to ' + config.databases.mongo + ": "))
-
-db.once('open', function () {
-    console.log('Mongoose: Connected to Mongo Database: ' + config.databases.mongo)
-})
 
 // Use
 app.use(bodyParser.json())
