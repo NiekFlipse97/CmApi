@@ -46,5 +46,15 @@ module.exports = {
                 console.error(err);
                 res.status(500).json(ErrorCode.internalServerError());
             });
+    },
+
+    getAllChecks(req, res) {
+        Check.find({})
+            .then(checks => {
+                res.status(200).json(checks).end()
+            })
+            .catch(error => {
+                res.status(500).json(error)
+            })
     }
 };
