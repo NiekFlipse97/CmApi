@@ -1,0 +1,36 @@
+{
+  "name": "cmapi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "engines": {
+    "node": "11.5.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NiekFlipse97/CmApi.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NiekFlipse97/CmApi/issues"
+  },
+  "homepage": "https://github.com/NiekFlipse97/CmApi#readme",
+  "dependencies": {
+    "bcrypt": "^3.0.2",
+    "body-parser": "^1.18.3",
+    "boxen": "^2.0.0",
+    "chai": "^4.2.0",
+    "express": "^4.16.4",
+    "jwt-simple": "^0.5.5",
+    "mocha": "^5.2.0",
+    "moment": "^2.23.0",
+    "mongo-sql": "^6.2.0",
+    "mongoose": "^5.4.0",
+    "nodemon": "^1.18.9"
+  }
+}
