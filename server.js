@@ -27,7 +27,7 @@ app.use(bodyParser.json())
 
 // Routes
 app.get('/', (req, res) => res.send('Hello World!'))
-
+app.use('/api', require('./routes/check.routes'));
 
 // Catch 404's
 // app.use('*', function (req, res) {
