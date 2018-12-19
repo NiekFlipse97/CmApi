@@ -1,4 +1,4 @@
-const Check = require('../models/Check');
+const Check = require('../models/check');
 const Error = require('../errorHandling/error');
 const ErrorCode = require('../errorHandling/errorcodes');
 const MongoSQL = require('mongo-sql');
