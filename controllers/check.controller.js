@@ -3,6 +3,15 @@ const Error = require('../errorHandling/error');
 const ErrorCode = require('../errorHandling/errorcodes');
 const MongoSQL = require('mongo-sql');
 
+let createQuery = (query) => {
+    let values = query.values;
+    let result = query.toString();
+    for(let i = 0; i < values.length; i++){
+        result = result.replace(`$${i + 1}`, `${values[i]}`);
+    }
+    return result;
+};
+
 module.exports = {
     createCheck(req, res, next){
         let check = new Check({name: req.body.name, description: req.body.description, condition: req.body.condition});
@@ -39,13 +48,4 @@ module.exports = {
                 res.status(500).json(ErrorCode.internalServerError());
             });
     }
-};
-
-let createQuery = (query) => {
-    let values = query.values;
-    let result = query.toString();
-    for(let i = 0; i < values.length; i++){
-        result = result.replace(`$${i + 1}`, `${values[i]}`);
-    }
-    return result;
 };
