@@ -20,7 +20,7 @@ module.exports = {
         {
             if(error.errors.name) return res.status(400).json(new Error(error.errors.name, 400));
             if(error.errors.description) return res.status(400).json(new Error(error.errors.description, 400));
-            if(error.errors.condition) return res.status(400).json(new Error(error.errorss.condition, 400));
+            if(error.errors.condition) return res.status(400).json(new Error(error.errors.condition, 400));
         }
 
         let query = {
