@@ -1,6 +1,6 @@
 const Check = require('../models/check');
 const Error = require('../errorHandling/error');
-const ErrorCode = require('../errorHandling/errorcodes');
+const Errors = require('../errorHandling/errorcodes');
 const MongoSQL = require('mongo-sql');
 
 let createQuery = (query) => {
@@ -56,6 +56,19 @@ module.exports = {
             })
             .catch(error => {
                 res.status(500).json(error)
+            })
+    },
+
+    getCheckById(req, res) {
+        let id = req.params.id
+
+        Check.findById(id)
+            .then(check => {
+                res.status(200).json(check).end()
+            })
+            .catch(error => {
+                let err = Errors.notFound()
+                res.status(err.code).json(err).end()
             })
     }
 };
