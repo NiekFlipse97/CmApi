@@ -17,7 +17,7 @@ const CheckSchema = new Schema({
         validate: {
             validate: {
                 validator: (description) => description.length > 2 && name.length < 256,
-                message: "The description must be between 2 and 2566 characters"
+                message: "The description must be between 2 and 256 characters"
             }
         },
         required: [true, "A description is required"]

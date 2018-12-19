@@ -9,12 +9,17 @@ module.exports = {
         let error = check.validateSync();
         if(error)
         {
-            if(error.errors.name) return res.status(400).json(new Error(error.error.name, ErrorCode.badRequest().code));
-            if(error.errors.description) return res.status(400).json(new Error(error.errors.description, ErrorCode.badRequest().code));
-            if(error.errors.condition) return res.status(400).json(new Error(error.errors.condition, ErrorCode.badRequest().code));
+            if(error.errors.name) return res.status(400).json(new Error(error.error.name, 400));
+            if(error.errors.description) return res.status(400).json(new Error(error.errors.description, 400));
+            if(error.errors.condition) return res.status(400).json(new Error(error.errors.condition, 400));
         }
 
-        let sqlStatement = MongoSQL.sql().toString();
+        let query = {
+            type: 'select',
+            table: 'checks',
+            where: req.body.condition
+        };
+        let sqlStatement = MongoSQL.sql(query).toString();
         if(new RegExp(".*(drop|alter|insert)+.*").test(sqlStatement))
             return res.status(400).json(new Error("invalid condition", 400));
 
@@ -29,7 +34,7 @@ module.exports = {
             })
             .catch((err) => {
                 console.error(err);
-                res.status(500).json(new Error(ErrorCode.internalServerError().message, ErrorCode.internalServerError().code));
+                res.status(500).json(ErrorCode.internalServerError());
             });
     }
 };
