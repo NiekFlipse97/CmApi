@@ -14,7 +14,8 @@ let createQuery = (query) => {
 
 module.exports = {
     createCheck(req, res, next){
-        let check = new Check({name: req.body.name, description: req.body.description, condition: req.body.condition});
+        let check = new Check({name: req.body.name, description: req.body.description,
+            condition: JSON.stringify(req.body.condition)});
         let error = check.validateSync();
         if(error)
         {

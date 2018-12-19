@@ -8,6 +8,7 @@ mongoose.Promise = global.Promise;
 
 let isInTest = typeof global.it === 'function';
 
+//isInTest = true;
 if(!isInTest)
 {
     mongoose.connect(config.databases.mongo_atlas, {useNewUrlParser: true})
@@ -18,7 +19,7 @@ if(!isInTest)
 }
 else
 {
-    mongoose.connect(config.databases.mongotest, {useNewUrlParser: true})
+    mongoose.connect(config.databases.mongotest_atlas, {useNewUrlParser: true})
         .then(() => {
             console.log("Connection to the local Mongo test database has been made");
         })

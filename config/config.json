@@ -3,7 +3,8 @@
     "databases": {
         "mongo": "mongodb://localhost/cm_mongo",
         "mongotest": "mongodb://localhost/cm_mongo_test",
-        "mongo_atlas": "mongodb+srv://CAdmin:rj0Ps4Z8pJUYRrmF@cmcontrolchecks-dmlq0.azure.mongodb.net/test?retryWrites=true"
+        "mongo_atlas": "mongodb+srv://CAdmin:rj0Ps4Z8pJUYRrmF@cmcontrolchecks-dmlq0.azure.mongodb.net/test?retryWrites=true",
+        "mongotest_atlas": "mongodb+srv://CAdmin:rj0Ps4Z8pJUYRrmF@cmcontrolcheckstest-aedfu.azure.mongodb.net/test?retryWrites=true"
     },
     "secret": "GpsNX9PqESH6etkF"
 }
