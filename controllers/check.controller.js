@@ -19,9 +19,10 @@ module.exports = {
             table: 'payments',
             where: req.body.condition
         };
-        let sqlStatement = MongoSQL.sql(query).toString();
-        if(new RegExp(".*(drop|alter|insert)+.*").test(sqlStatement))
-            return res.status(400).json(new Error("invalid condition", 400));
+        let sqlStatement = MongoSQL.sql(query);
+        console.log(`Statement: ${createQuery(sqlStatement)}`);
+        //if(new RegExp(".*(drop|alter|insert)+.*").test(sqlStatement))
+        //    return res.status(400).json(new Error("invalid condition", 400));
 
         /** TEST QUERY ON ACTUAL DATABASE TO VERIFY VIABILITY OF CONDITION **/
 
@@ -37,4 +38,13 @@ module.exports = {
                 res.status(500).json(ErrorCode.internalServerError());
             });
     }
+};
+
+let createQuery = (query) => {
+    let values = query.values;
+    let result = query.toString();
+    for(let i = 0; i < values.length; i++){
+        result = result.replace(`$${i + 1}`, `${values[i]}`);
+    }
+    return result;
 };

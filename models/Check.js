@@ -13,16 +13,16 @@ const CheckSchema = new Schema({
     description: {
         type: String,
         validate: {
-            validator: (description) => description.length > 2 && name.length < 256,
+            validator: (description) => description.length > 2 && description.length < 256,
             message: "The description must be between 2 and 256 characters"
         },
         required: [true, "A description is required"]
     },
     condition: {
-        type: String,
+        type: Object,
         required: [true, "A condition is required"]
     },
-    sqlStatement: Object
+    sqlStatement: String
 });
 
 const Check = mongoose.model('check', CheckSchema);
