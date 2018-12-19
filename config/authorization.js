@@ -5,11 +5,11 @@ const jwt = require('jwt-simple');
 //
 // Encode (van username naar token)
 //
-function encodeToken(username) {
+function encodeToken(userId) {
     const payload = {
         exp: moment().add(10, 'days').unix(),
         iat: moment().unix(),
-        sub: username
+        sub: userId
     };
     return jwt.encode(payload, config.secret)
 }

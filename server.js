@@ -36,11 +36,17 @@ db.once('open', function () {
 // Use
 app.use(bodyParser.json())
 
+//CORS
+var cors = require('cors')
+app.use(cors())
+
 // Route files
+const authRoutes = require('./routes/auth.routes')
 
 
 // Routes
 app.get('/', (req, res) => res.send('Hello World!'))
+app.use('/auth', authRoutes)
 
 
 // Catch 404's
