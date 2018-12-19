@@ -1,6 +1,7 @@
-let routes = require('express').Router();
-const CheckController = require('../controllers/check.controller');
+let routes = require('express').Router()
+const controller = require('../controllers/check.controller')
 
-routes.post('/', CheckController.createCheck);
+routes.post('/', controller.createCheck)
+routes.get('/', controller.getAllChecks)
 
-module.exports = routes;
+module.exports = routes

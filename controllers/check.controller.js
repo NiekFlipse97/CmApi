@@ -1,4 +1,4 @@
-const Check = require('../models/Check');
+const Check = require('../models/check');
 const Error = require('../errorHandling/error');
 const ErrorCode = require('../errorHandling/errorcodes');
 const MongoSQL = require('mongo-sql');
@@ -47,5 +47,15 @@ module.exports = {
                 console.error(err);
                 res.status(500).json(ErrorCode.internalServerError());
             });
+    },
+
+    getAllChecks(req, res) {
+        Check.find({})
+            .then(checks => {
+                res.status(200).json(checks).end()
+            })
+            .catch(error => {
+                res.status(500).json(error)
+            })
     }
 };
