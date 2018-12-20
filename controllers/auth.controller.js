@@ -15,12 +15,13 @@ function login(req, res) {
                         res.status(401).json(Errors.unauthorized())
                     }
 
-                    token = auth.encodeToken(user._id)
+                    let token = auth.encodeToken(user._id)
                     res.status(200).json({token: token})
 
                 })
                 .catch(err => {
-                    res.status(401).json(err)
+                    console.log(err);
+                    res.status(401).json(Errors.unauthorized())
                 })
 
         })

@@ -16,35 +16,38 @@ describe('Authentication', () => {
 
     beforeEach((done) => {
         testPassword = "testPassword";
-        bcrypt.hash(testPassword, saltRounds, (err, hash) => {
-            if(err) throw err;
-            testUser = new User({username: "testUser", password: hash});
-            testUser.save()
-                .then((userDb) => {
-                    testUser = userDb;
-                    done();
-                })
-                .catch((err) => {throw err});
-        });
+        bcrypt.hash(testPassword, saltRounds)
+            .then((hash) => {
+                testUser = new User({username: "testUser", password: hash});
+                testUser.save()
+                    .then((userDb) => {
+                        testUser = userDb;
+                        done();
+                    });
+            });
     });
 
-    xit('will return a JWT token when login is correct', (done) => {
+    it('will return a JWT token when login is correct', (done) => {
         chai.request(server)
-            .post('/auth')
-            .send({})
+            .post('/api/auth')
+            .send({
+                username: testUser.username,
+                password: testPassword
+            })
             .end((err, res) => {
                 res.should.have.status(200);
                 chai.assert.isNotNull(res.body);
-                let payload = authorization.decodeToken(res.body);
-                User.findById(payload.sub)
-                   .then((userDb) => {
-                       chai.assert.isNotNull(userDb);
-                       assert.strictEqual(userDb.username, testUser.username);
-                       done();
-                   })
-                   .catch((error) => {
-                       throw error;
-                   });
+                authorization.decodeToken(res.body.token, (err, payload) => {
+                    User.findById(payload.sub)
+                        .then((userDb) => {
+                            chai.assert.isNotNull(userDb);
+                            assert.strictEqual(userDb.username, testUser.username);
+                            done();
+                        })
+                        .catch((error) => {
+                            throw error;
+                        });
+                });
             });
     });
 });
