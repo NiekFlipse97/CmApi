@@ -81,7 +81,8 @@ module.exports = {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json("invalid id", 400);
 
         let check = new Check({
-            name: req.body.name, description: req.body.description,
+            name: req.body.name,
+            description: req.body.description,
             condition: JSON.stringify(req.body.condition)
         });
         let error = check.validateSync();
@@ -103,6 +104,7 @@ module.exports = {
 
         /** TEST QUERY ON ACTUAL DATABASE TO VERIFY VIABILITY OF CONDITION **/
 
+        check._id = req.params.id;
         Check.findByIdAndUpdate(req.params.id, check)
             .then((checkDb) => {
                 res.status(204).json(checkDb);
