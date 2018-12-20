@@ -2,6 +2,7 @@ const Check = require('../models/check');
 const Error = require('../errorHandling/error');
 const Errors = require('../errorHandling/errorcodes');
 const MongoSQL = require('mongo-sql');
+const mongoose = require('mongoose');
 
 let createQuery = (query) => {
     let values = query.values;
@@ -70,5 +71,41 @@ module.exports = {
                 let err = Errors.notFound()
                 res.status(err.code).json(err).end()
             })
+    },
+
+    editCheck(req, res){
+        if(!req.params.id) return res.status(400).json("Missing id, of the check, in the url", 400);
+        if(!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json("invalid id", 400);
+
+        let check = new Check({name: req.body.name, description: req.body.description,
+            condition: JSON.stringify(req.body.condition)});
+        let error = check.validateSync();
+        if(error)
+        {
+            if(error.errors.name) return res.status(400).json(new Error(error.errors.name, 400));
+            if(error.errors.description) return res.status(400).json(new Error(error.errors.description, 400));
+            if(error.errors.condition) return res.status(400).json(new Error(error.errors.condition, 400));
+        }
+
+        let query = {
+            type: 'select',
+            table: 'payments',
+            where: req.body.condition
+        };
+        let sqlStatement = MongoSQL.sql(query);
+        if(new RegExp(".*(drop|alter|insert)+.*").test(sqlStatement.toString()))
+            return res.status(400).json(new Error("invalid condition", 400));
+        check.sqlStatement = createQuery(sqlStatement);
+
+        /** TEST QUERY ON ACTUAL DATABASE TO VERIFY VIABILITY OF CONDITION **/
+
+        Check.findByIdAndUpdate(req.params.id, check)
+            .then((checkDb) => {
+                res.status(204).json(checkDb);
+            })
+            .catch((err) => {
+                console.error(err);
+                res.status(500).json(Errors.internalServerError());
+            });
     }
 };
