@@ -32,9 +32,9 @@ const checkRoutes = require('./routes/check.routes')
 
 
 // Routes
-app.get('/', (req, res) => res.send('Hello World!'))
-app.use('/auth', authRoutes)
-app.use('/checks', checkRoutes)
+app.get('/', (req, res) => res.send('Welcome to the CM API!'))
+app.use('/api/auth', authRoutes)
+app.use('/api/checks', checkRoutes)
 
 // Catch 404's
 // app.use('*', function (req, res) {
