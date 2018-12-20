@@ -64,6 +64,9 @@ module.exports = {
 
         Check.findById(id)
             .then(check => {
+                if(check == null || check == undefined){
+                    return res.status(404).json(Errors.notFound())
+                }
                 res.status(200).json(check).end()
             })
             .catch(error => {
