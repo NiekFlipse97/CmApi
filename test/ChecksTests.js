@@ -36,6 +36,100 @@ describe('Authentication', () => {
         });
     });
 
+    /** POST checks **/
+    it('can create a check', (done) => {
+        let check = {name: "Testing Check", description: "Check for testing", condition: {MerchantAmount: 200}};
+
+        chai.request(server)
+            .post('/api/checks')
+            .send(check)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(200);
+
+                Check.findOne({name: check.name})
+                    .then((check) => {
+                        chai.assert.isNotNull(check);
+                        chai.assert.isNotNull(check.sqlStatement);
+                        assert.strictEqual(check.sqlStatement, 'SELECT "Payments".* FROM "Payments" ' +
+                            'WHERE "Payments"."MerchantAmount" = 200');
+                        done();
+                    })
+            })
+    });
+
+    it('will not create a check without a JWT', (done) => {
+        let check = {name: "Testing Check", description: "Check for testing", condition: {MerchantAmount: 200}};
+
+        chai.request(server)
+            .post('/api/checks')
+            .send(check)
+            .end((err, res) => {
+                res.should.have.status(401);
+
+                Check.findOne({name: check.name})
+                    .then((check) => {
+                        chai.assert.isNull(check);
+                        done();
+                    })
+            })
+    });
+
+    it('will not create a check without a name', (done) => {
+        let check = {description: "Check for testing", condition: {MerchantAmount: 200}};
+
+        chai.request(server)
+            .post('/api/checks')
+            .send(check)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(400);
+
+                Check.findOne({description: check.description})
+                    .then((check) => {
+                        chai.assert.isNull(check);
+                        done();
+                    })
+            })
+    });
+
+    it('will not create a check without a description', (done) => {
+        let check = {name: "Testing Check", condition: {MerchantAmount: 200}};
+
+        chai.request(server)
+            .post('/api/checks')
+            .send(check)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(400);
+
+                Check.findOne({name: check.name})
+                    .then((check) => {
+                        chai.assert.isNull(check);
+                        done();
+                    })
+            })
+    });
+
+    it('will not create a check without a condition', (done) => {
+        let check = {name: "Testing Check", description: "Check for testing"};
+
+        chai.request(server)
+            .post('/api/checks')
+            .send(check)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(200);
+
+                Check.findOne({name: check.name})
+                    .then((check) => {
+                        chai.assert.isNull(check);
+                        done();
+                    })
+            })
+    });
+
+    /** GET checks**/
     it('can get checks', (done) => {
         let testCheck2 = new Check({name: "testName2", description: "testDescription2", condition: 'MerchantAmount: 0',
             sqlStatement: 'SELECT "Payments".* FROM "Payments" WHERE "Payments"."MerchantAmount" = 0'});
@@ -86,4 +180,8 @@ describe('Authentication', () => {
                 done();
             });
     });
+
+    /** PUT checks **/
+
+    /** DELETE checks **/
 });
