@@ -65,6 +65,9 @@ module.exports = {
 
         Check.findById(id)
             .then(check => {
+                if(check == null || check == undefined){
+                    return res.status(404).json(Errors.notFound())
+                }
                 res.status(200).json(check).end()
             })
             .catch(error => {
@@ -73,18 +76,19 @@ module.exports = {
             })
     },
 
-    editCheck(req, res){
-        if(!req.params.id) return res.status(400).json("Missing id, of the check, in the url", 400);
-        if(!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json("invalid id", 400);
+    editCheck(req, res) {
+        if (!req.params.id) return res.status(400).json("Missing id, of the check, in the url", 400);
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json("invalid id", 400);
 
-        let check = new Check({name: req.body.name, description: req.body.description,
-            condition: JSON.stringify(req.body.condition)});
+        let check = new Check({
+            name: req.body.name, description: req.body.description,
+            condition: JSON.stringify(req.body.condition)
+        });
         let error = check.validateSync();
-        if(error)
-        {
-            if(error.errors.name) return res.status(400).json(new Error(error.errors.name, 400));
-            if(error.errors.description) return res.status(400).json(new Error(error.errors.description, 400));
-            if(error.errors.condition) return res.status(400).json(new Error(error.errors.condition, 400));
+        if (error) {
+            if (error.errors.name) return res.status(400).json(new Error(error.errors.name, 400));
+            if (error.errors.description) return res.status(400).json(new Error(error.errors.description, 400));
+            if (error.errors.condition) return res.status(400).json(new Error(error.errors.condition, 400));
         }
 
         let query = {
@@ -93,7 +97,7 @@ module.exports = {
             where: req.body.condition
         };
         let sqlStatement = MongoSQL.sql(query);
-        if(new RegExp(".*(drop|alter|insert)+.*").test(sqlStatement.toString()))
+        if (new RegExp(".*(drop|alter|insert)+.*").test(sqlStatement.toString()))
             return res.status(400).json(new Error("invalid condition", 400));
         check.sqlStatement = createQuery(sqlStatement);
 
@@ -107,5 +111,17 @@ module.exports = {
                 console.error(err);
                 res.status(500).json(Errors.internalServerError());
             });
+    },
+
+    deleteCheck(req, res) {
+        let id = req.params.id
+
+        Check.findByIdAndDelete(id)
+            .then(check => {
+                res.status(204).json({deleted: check.name})
+            })
+            .catch(err => {
+                res.status(404).json(Errors.notFound())
+            })
     }
 };
