@@ -11,9 +11,7 @@ function login(req, res) {
         .then(user => {
             bcrypt.compare(password, user.password)
                 .then(match => {
-                    if(!match) {
-                        res.status(401).json(Errors.unauthorized())
-                    }
+                    if(!match) return res.status(401).json(Errors.unauthorized())
 
                     token = auth.encodeToken(user._id)
                     res.status(200).json({token: token})

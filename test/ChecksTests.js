@@ -42,7 +42,7 @@ describe('Authentication', () => {
         testCheck2.save()
             .then(() => {
                 chai.request(server)
-                    .get('/checks')
+                    .get('/api/checks')
                     .set('X-Access-token', JWT)
                     .end((err, res) => {
                         res.should.have.status(200);
@@ -53,6 +53,37 @@ describe('Authentication', () => {
                         chai.assert.strictEqual(res.body[1].name, testCheck2.name);
                         done();
                     });
+            });
+    });
+
+    it('will not get checks without JWT', (done) => {
+        chai.request(server)
+            .get('/api/checks')
+            .end((err, res) => {
+                res.should.have.status(401);
+                done();
+            });
+    });
+
+    it('can get a check by id', (done) => {
+        chai.request(server)
+            .get(`/api/checks/${testCheck._id}`)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(200);
+                chai.assert.isNotNull(res.body);
+                assert.strictEqual(res.body._id.toString(), testCheck._id.toString());
+                assert.strictEqual(res.body.name, testCheck.name);
+                done();
+            });
+    });
+
+    it('will not get a check by id without JWT', (done) => {
+        chai.request(server)
+            .get(`/api/checks/${testCheck._id}`)
+            .end((err, res) => {
+                res.should.have.status(401);
+                done();
             });
     });
 });
