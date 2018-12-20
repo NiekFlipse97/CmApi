@@ -19,7 +19,7 @@ const CheckSchema = new Schema({
         required: [true, "A description is required"]
     },
     condition: {
-        type: Object,
+        type: String,
         required: [true, "A condition is required"]
     },
     sqlStatement: String
