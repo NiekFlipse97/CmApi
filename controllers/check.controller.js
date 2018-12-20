@@ -70,5 +70,17 @@ module.exports = {
                 let err = Errors.notFound()
                 res.status(err.code).json(err).end()
             })
+    },
+
+    deleteCheck(req, res) {
+        let id = req.params.id
+
+        Check.findByIdAndDelete(id)
+            .then(check => {
+                res.status(204).json({deleted: check.name})
+            })
+            .catch(err => {
+                res.status(404).json(Errors.notFound())
+            })
     }
 };
