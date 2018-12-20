@@ -1,11 +1,8 @@
-const mongoose = require('mongoose');
+const Check = require('../models/check');
+const User = require('../models/user');
 
 beforeEach((done) => {
-    const { checks, users } = mongoose.connection.collections;
-
-    checks.drop(() => {
-        users.drop(() => {
-            done();
-        })
-    })
+    Check.deleteMany()
+        .then(() => User.deleteMany())
+        .then(() => done())
 });
