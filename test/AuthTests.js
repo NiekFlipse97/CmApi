@@ -44,10 +44,37 @@ describe('Authentication', () => {
                             assert.strictEqual(userDb.username, testUser.username);
                             done();
                         })
-                        .catch((error) => {
-                            throw error;
-                        });
                 });
+            });
+    });
+
+    it('will not return a JWT token when password is incorrect', (done) => {
+        chai.request(server)
+            .post('/api/auth')
+            .send({
+                username: testUser.username,
+                password: "hsdhfhksjd"
+            })
+            .end((err, res) => {
+                res.should.have.status(401);
+                chai.assert.isNotNull(res.body);
+                chai.expect(res.body).to.not.have.property('Token');
+                done();
+            });
+    });
+
+    it('will not return a JWT token when username is incorrect', (done) => {
+        chai.request(server)
+            .post('/api/auth')
+            .send({
+                username: "d",
+                password: testPassword
+            })
+            .end((err, res) => {
+                res.should.have.status(401);
+                chai.assert.isNotNull(res.body);
+                chai.expect(res.body).to.not.have.property('Token');
+                done();
             });
     });
 });
