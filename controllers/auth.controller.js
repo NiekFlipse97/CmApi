@@ -9,6 +9,7 @@ function login(req, res) {
 
     User.findOne({ username: username })
         .then(user => {
+            console.log(password + " ....... " + user.password)
             bcrypt.compare(password, user.password)
                 .then(match => {
                     if(!match) return res.status(401).json(Errors.unauthorized())
