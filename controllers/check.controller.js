@@ -1,6 +1,8 @@
 const Check = require('../models/check');
 const Error = require('../errorHandling/error');
 const Errors = require('../errorHandling/errorcodes');
+const SQLConnection = require('../config/sql_database')
+
 const MongoSQL = require('mongo-sql');
 
 let createQuery = (query) => {
@@ -35,6 +37,10 @@ module.exports = {
         check.sqlStatement = createQuery(sqlStatement);
 
         /** TEST QUERY ON ACTUAL DATABASE TO VERIFY VIABILITY OF CONDITION **/
+        SQLConnection.query(check.sqlStatement, (error, results) => {
+            if(error) return res.status(400).json(new Error("Invalid statement: " + error, 400))
+        })
+        SQLConnection.end()
 
         let result;
         check.save()
