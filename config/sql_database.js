@@ -1,11 +1,11 @@
-const sql = require('mysql')
-const connection = sql.createConnection({
-    host: 'localhost',
-    user: 'user',
-    password: 'password',
-    database: 'database'
-})
+// const sql = require('mysql')
+// const connection = sql.createConnection({
+//     host: 'localhost',
+//     user: 'user',
+//     password: 'password',
+//     database: 'database'
+// })
 
-connection.connect()
+// connection.connect()
 
-module.exports = connection
+// module.exports = connection
