@@ -22,8 +22,18 @@ const CheckSchema = new Schema({
         type: String,
         required: [true, "A condition is required"]
     },
-    sqlStatement: String
+    sqlStatement: String,
+    sqlID: {
+        type: Number
+    }
 });
+
+CheckSchema.options.toJSON.transform = removeSqlID;
+
+function removeSqlID(doc, ret, options){
+    delete ret.sqlID;
+    return ret;
+}
 
 const Check = mongoose.model('check', CheckSchema);
 module.exports = Check;

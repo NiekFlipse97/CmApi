@@ -1,11 +1,12 @@
-const sql = require('mysql')
-const connection = sql.createConnection({
+const sql = require('mysql');
+const localDatabaseConnectionOptions = {
     host: 'localhost',
-    user: 'user',
-    password: 'password',
-    database: 'database'
-})
+    user: 'root',
+    database: 'paymentsolaptestforstudents',
+    debug: true
+};
+const connection = sql.createConnection(localDatabaseConnectionOptions);
 
-connection.connect()
+connection.connect();
 
-module.exports = connection
+module.exports = connection;
