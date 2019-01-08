@@ -1,4 +1,4 @@
-const sql = require('mysql');
+const sql = require('mssql');
 const localDatabaseConnectionOptions = {
     host: 'localhost',
     user: 'root',
