@@ -1,8 +1,9 @@
 const Check = require('../models/check');
-const sqlDb = require('../config/sql_database');
-const mysql = require('mssql');
+const sqlDb = require('../config/sql_database').connection;
+const sqlDbConnectionPool = require('../config/sql_database').connectionPool;
+const sql = require('mssql');
 let checks = [];
-let idOfLastCheckedPayment; /** WHERE TO BE SAVED? **/
+let idOfLastCheckedPayment = 0; /** WHERE TO BE SAVED? **/
 
 function getAllChecks(){
     return new Promise((resolve, reject) => {
@@ -55,26 +56,48 @@ function createAlertsForAllFailedChecks(paymentsThatFailedCheck, checkID){
 }
 
 function createAlert(paymentID, checkID){
-    let alert = {
-        ID: null,
-        CheckID: checkID,
-        PaymentID: paymentID,
-        Resolved: 0,
-        Comment: null,
-        AlertCreatedOn: new Date()
-    };
-    sqlDb.query(createInsertQueryForAlert(alert), (error, results, fields) => {
-        if(error) {
-            console.log(error);
-            throw error;
-        }
-    })
+    return new Promise((resolve, reject) => {
+        let alert = {
+            ID: null,
+            CheckID: checkID,
+            PaymentID: paymentID,
+            Resolved: 0,
+            Comment: null,
+            AlertCreatedOn: new Date()
+        };
+        saveAlert(alert)
+            .then((result) => resolve(result))
+            .catch((error) => logCheckError(error));
+    });
+
 }
 
-function createInsertQueryForAlert(alert){
-    let query = 'INSERT INTO "Alerts" (CheckNavID, PaymentID, Resolved, AlertCreatedIb) VALUES (?, ?, ?, ?);';
-    let insert = [alert.CheckID, alert.PaymentID, alert.Resolved, alert.AlertCreatedOn];
-    return mysql.format(query, insert);
+function saveAlert(alert){
+    return new Promise((resolve, reject) => {
+        let preparedStatement = createPreparedStatement();
+        preparedStatement.prepare('INSERT INTO Alerts (CheckNavID, PaymentID, Resolved, AlertCreatedOn) ' +
+            'VALUES (@CheckID, @PaymentID, @Resolved, @AlertCreatedOn);')
+            .then((prepResults) => {
+                //console.log(prepResults);
+                return preparedStatement.execute({
+                    CheckID: alert.CheckID,
+                    PaymentID: alert.PaymentID,
+                    Resolved: 0,
+                    AlertCreatedOn: alert.AlertCreatedOn
+                })
+            })
+            .then((result) => resolve(result))
+            .catch((error) => logCheckError(error));
+    });
+}
+
+function createPreparedStatement(){
+    let ps = new sql.PreparedStatement(sqlDbConnectionPool);
+    ps.input('CheckID', sql.Int);
+    ps.input('PaymentID', sql.BigInt);
+    ps.input('Resolved', sql.Bit);
+    ps.input('AlertCreatedOn', sql.DateTime2);
+    return ps;
 }
 
 function executeChecksOnInterval(intervalInSeconds){
@@ -86,7 +109,17 @@ function logCheckError(error){
     console.error(error);
 }
 
+/** Temporary test function **/
+function test(){
+setTimeout(function () {
+    createAlert(123, 1)
+        .then((results) => console.log(results))
+        .catch((err) => console.log(err));
+}, 500);
+}
+
 module.exports = {
     getAllChecks,
-    executeChecksOnInterval
+    executeChecksOnInterval,
+    test
 };

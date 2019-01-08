@@ -1,12 +1,15 @@
 const sql = require('mssql');
 const localDatabaseConnectionOptions = {
-    host: 'localhost',
-    user: 'root',
-    database: 'paymentsolaptestforstudents',
-    debug: true
+    server: 'aei-sql.avans.nl',
+    user: 'CMAdmin',
+    password: 'CadMin!A4',
+    database: 'CMPaymentsA4'
 };
-const connection = sql.createConnection(localDatabaseConnectionOptions);
+const connectionPool = new sql.ConnectionPool(localDatabaseConnectionOptions);
+const connection = connectionPool.connect()
+    .then(() => console.log("Connection to the SQL database has been made"));
 
-connection.connect();
-
-module.exports = connection;
+module.exports = {
+    connection,
+    connectionPool
+};

@@ -28,7 +28,7 @@ const CheckSchema = new Schema({
     }
 });
 
-CheckSchema.options.toJSON.transform = removeSqlID;
+//CheckSchema.options.toJSON.transform = removeSqlID;
 
 function removeSqlID(doc, ret, options){
     delete ret.sqlID;
