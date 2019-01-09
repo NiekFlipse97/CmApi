@@ -37,10 +37,10 @@ module.exports = {
         check.sqlStatement = createQuery(sqlStatement);
 
         /** TEST QUERY ON ACTUAL DATABASE TO VERIFY VIABILITY OF CONDITION **/
-        SQLConnection.query(check.sqlStatement, (error, results) => {
-            if(error) return res.status(400).json(new Error("Invalid statement: " + error, 400))
-        })
-        SQLConnection.end()
+        // SQLConnection.query(check.sqlStatement, (error, results) => {
+        //     if(error) return res.status(400).json(new Error("Invalid statement: " + error, 400))
+        // })
+        // SQLConnection.end()
 
         let result;
         check.save()
