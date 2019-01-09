@@ -1,7 +1,8 @@
 const Check = require('../models/check');
 const Error = require('../errorHandling/error');
 const Errors = require('../errorHandling/errorcodes');
-const SQLConnection = require('../config/sql_database')
+const SQLConnection = require('../config/sql_database');
+const sql = require('mssql');
 
 const MongoSQL = require('mongo-sql');
 
@@ -38,6 +39,8 @@ module.exports = {
 
         /** TEST QUERY ON ACTUAL DATABASE TO VERIFY VIABILITY OF CONDITION **/
         SQLConnection.executeSqlStatement(sqlStatement)
+            .then(() => (console.log("Sql query executed successfully")))
+            .catch((error) => console.log(error));
 
         // let result;
         // check.save()
