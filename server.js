@@ -3,6 +3,8 @@ const bodyParser = require('body-parser')
 const boxen = require('boxen');
 const app = express()
 const mongodb = require('./databases/mongodb')
+const CheckExecutor = require('./checkExecutor/CheckExecutor');
+const sqlDb = require('./config/sql_database');
 
 // Config
 const config = require('./config/config.json')
@@ -40,6 +42,9 @@ app.use('/api/checks', checkRoutes)
 // app.use('*', function (req, res) {
 //     res.status('404').json(new NotFoundResponse(req.originalUrl)).end()
 // })
+
+sqlDb.getConnection();
+CheckExecutor.test();
 
 // Listen on port
 var server = app.listen(process.env.PORT || config.port, function () {

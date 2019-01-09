@@ -1,9 +1,10 @@
 const Check = require('../models/check');
-const sqlDb = require('../config/sql_database').connection;
+const sqlDb = require('../config/sql_database');
 const sqlDbConnectionPool = require('../config/sql_database').connectionPool;
 const sql = require('mssql');
+const CheckExecutorConfig = require('../models/CheckExecutorConfig');
 let checks = [];
-let idOfLastCheckedPayment = 0; /** WHERE TO BE SAVED? **/
+let idOfLastCheckedPayment;
 
 function getAllChecks(){
     return new Promise((resolve, reject) => {
@@ -21,41 +22,47 @@ function getAllChecks(){
 
 function getIdOfNewestPayment(){
     return new Promise(((resolve, reject) => {
-        sqlDb.query('SELECT TOP 1 ID FROM Payments ORDER BY ID DESC', (error, results, fields) => {
-            reject(error);
-            resolve(results[0].ID);
-        })
+        sqlDb.executeSqlStatement('SELECT TOP 1 ID FROM Payments ORDER BY ID DESC')
+            .then((results) => {
+                //console.log(results.recordset[0].ID);
+                resolve(results.recordset[0].ID);
+            })
+            .catch((error) => {
+                console.warn("Retrieving of newest PaymentID was unsuccessful");
+                console.error(error);
+                resolve(idOfLastCheckedPayment);
+            })
+
     }))
 }
 
 async function executeChecks() {
-    let idOfNewestPayment;
-    try {
-        idOfNewestPayment = await getIdOfNewestPayment();
-    }
-    catch (error) {
-        return logCheckError(error);
-    }
+    if(!idOfLastCheckedPayment) await getLastCheckedPaymentID();
+    let idOfNewestPayment = await getIdOfNewestPayment();
+    //console.log("idOfLastCheckedPayment: " + idOfLastCheckedPayment);
+    //console.log("idOfNewestPayment: " + idOfNewestPayment);
+
     let checkID = 1;
     for(let check of checks){
         let sqlStatement = check.sqlStatement + ' AND "Payments"."id" > ' + idOfLastCheckedPayment +
             ' AND "Payments"."id" <= ' + idOfNewestPayment + ';';
-        sqlDb.query(sqlStatement, (error, results, fields) => {
-            if(error) return logCheckError(error);
-            createAlertsForAllFailedChecks(results, checkID)
-        });
+        sqlDb.executeSqlStatement(sqlStatement)
+            .then((results) => createAlertsForAllFailedChecks(results.recordset, check.sqlID))
+            .catch((error) => logCheckError(error));
         checkID++;
     }
-    idOfLastCheckedPayment = idOfNewestPayment;
+    updateLastCheckedPaymentID(idOfNewestPayment);
 }
 
 function createAlertsForAllFailedChecks(paymentsThatFailedCheck, checkID){
     for(let payment of paymentsThatFailedCheck){
-        createAlert(payment.PaymentID, checkID);
+        //console.log(payment);
+        createAlert(payment.ID, checkID);
     }
 }
 
 function createAlert(paymentID, checkID){
+    //console.log(paymentID);
     return new Promise((resolve, reject) => {
         let alert = {
             ID: null,
@@ -100,6 +107,33 @@ function createPreparedStatement(){
     return ps;
 }
 
+function getLastCheckedPaymentID(){
+    return new Promise((resolve, reject) => {
+        CheckExecutorConfig.findOne()
+            .then((idObject) => {
+                //console.log(idObject);
+                //console.log("idObject paymentID: " + idObject.IDOfLastCheckedPayment);
+                idOfLastCheckedPayment = idObject.IDOfLastCheckedPayment;
+                resolve();
+            })
+            .catch((error) => {
+                console.warn("Retrieving of lastCheckedPaymentID was unsuccessful");
+                idOfLastCheckedPayment = BigInt.MAX;
+                console.error(error);
+            })
+    })
+}
+
+function updateLastCheckedPaymentID(ID){
+    //console.log("ID: " + ID);
+    CheckExecutorConfig.findOneAndUpdate({IDOfLastCheckedPayment: idOfLastCheckedPayment}, {IDOfLastCheckedPayment: ID})
+        .catch((error) => {
+            console.warn("Updating of lastCheckedPaymentID was unsuccessful");
+            console.error(error);
+        });
+    idOfLastCheckedPayment = ID;
+}
+
 function executeChecksOnInterval(intervalInSeconds){
     setInterval(executeChecks, intervalInSeconds * 1000);
 }
@@ -111,11 +145,13 @@ function logCheckError(error){
 
 /** Temporary test function **/
 function test(){
-setTimeout(function () {
-    createAlert(123, 1)
-        .then((results) => console.log(results))
-        .catch((err) => console.log(err));
-}, 500);
+    Check.findById("5c35e4372f3ee43324469bba")
+        .then((check) => {
+            //console.log("check:"); console.log(check);
+            checks = [check];
+
+            return executeChecks();
+        });
 }
 
 module.exports = {

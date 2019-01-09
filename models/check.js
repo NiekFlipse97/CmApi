@@ -28,12 +28,5 @@ const CheckSchema = new Schema({
     }
 });
 
-//CheckSchema.options.toJSON.transform = removeSqlID;
-
-function removeSqlID(doc, ret, options){
-    delete ret.sqlID;
-    return ret;
-}
-
 const Check = mongoose.model('check', CheckSchema);
 module.exports = Check;
