@@ -40,6 +40,18 @@ function getConnection(){
     })
 }
 
+new sql.ConnectionPool(config).connect()
+        .then(pool => {
+            console.log(`Connected to ${pool}`)
+            return pool.query('SELECT 1 + 1 AS result')
+        })
+        .then(result => {
+            console.log(`The result is ${result}`)
+        })
+        .catch(err => {
+            return err
+        })
+
 module.exports = {
     executeSqlStatement,
     connectionPool
