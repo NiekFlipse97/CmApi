@@ -12,14 +12,21 @@ const config = {
     }
 }
 
-new sql.ConnectionPool(config).connect()
-    .then(pool => {
-        return pool.query('SELECT 1 + 1 AS result')
-    })
-    .then(result => {
-        console.dir(result)
-    })
-    .catch(err => {
-        console.log(err)
-    })
-module.exports = sql
+let executeSqlStatement = (sqlStatement) => {
+    new sql.ConnectionPool(config).connect()
+        .then(pool => {
+            console.log(`Connected to ${pool}`)
+            return pool.query(sqlStatement)
+        })
+        .then(result => {
+            console.log(`The result is ${result}`)
+        })
+        .catch(err => {
+            return err
+        })
+
+}
+
+module.exports = {
+    executeSqlStatement
+}
