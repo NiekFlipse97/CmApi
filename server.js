@@ -44,6 +44,8 @@ app.use('/api/checks', checkRoutes)
 // })
 
 sqlDb.getConnection();
+CheckExecutor.getAllChecks();
+CheckExecutor.executeChecksOnInterval(5);
 //CheckExecutor.test();
 
 // Listen on port

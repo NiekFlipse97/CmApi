@@ -42,14 +42,16 @@ async function executeChecks() {
     //console.log("idOfLastCheckedPayment: " + idOfLastCheckedPayment);
     //console.log("idOfNewestPayment: " + idOfNewestPayment);
 
-    let checkID = 1;
     for(let check of checks){
+        //console.log(check);
         let sqlStatement = check.sqlStatement + ' AND "Payments"."id" > ' + idOfLastCheckedPayment +
             ' AND "Payments"."id" <= ' + idOfNewestPayment + ';';
         sqlDb.executeSqlStatement(sqlStatement)
-            .then((results) => createAlertsForAllFailedChecks(results.recordset, check.sqlID))
+            .then((results) => {
+                //console.log(results);
+                createAlertsForAllFailedChecks(results.recordset, check.sqlID)
+            })
             .catch((error) => logCheckError(error));
-        checkID++;
     }
     updateLastCheckedPaymentID(idOfNewestPayment);
 }
@@ -63,20 +65,16 @@ function createAlertsForAllFailedChecks(paymentsThatFailedCheck, checkID){
 
 function createAlert(paymentID, checkID){
     //console.log(paymentID);
-    return new Promise((resolve, reject) => {
-        let alert = {
-            ID: null,
-            CheckID: checkID,
-            PaymentID: paymentID,
-            Resolved: 0,
-            Comment: null,
-            AlertCreatedOn: new Date()
-        };
-        saveAlert(alert)
-            .then((result) => resolve(result))
-            .catch((error) => logCheckError(error));
-    });
-
+    let alert = {
+        ID: null,
+        CheckID: checkID,
+        PaymentID: paymentID,
+        Resolved: 0,
+        Comment: null,
+        AlertCreatedOn: new Date()
+    };
+    saveAlert(alert)
+        .catch((error) => logCheckError(error));
 }
 
 function saveAlert(alert){
@@ -93,7 +91,11 @@ function saveAlert(alert){
                     AlertCreatedOn: alert.AlertCreatedOn
                 })
             })
-            .then((result) => resolve(result))
+            .then((result) => {
+                preparedStatement.unprepare()
+                    .then(() => resolve(result))
+                    .catch((error) => logCheckError(error))
+            })
             .catch((error) => logCheckError(error));
     });
 }
@@ -135,7 +137,10 @@ function updateLastCheckedPaymentID(ID){
 }
 
 function executeChecksOnInterval(intervalInSeconds){
-    setInterval(executeChecks, intervalInSeconds * 1000);
+    setInterval(function () {
+        executeChecks()
+            .then(() => console.log("Checks have been done on newest payments"))
+    }, intervalInSeconds * 1000);
 }
 
 function logCheckError(error){
