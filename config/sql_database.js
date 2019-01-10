@@ -46,5 +46,6 @@ function getConnection(){
 
 module.exports = {
     executeSqlStatement,
-    connectionPool
+    connectionPool,
+    getConnection
 };
