@@ -22,7 +22,10 @@ const CheckSchema = new Schema({
         type: String,
         required: [true, "A condition is required"]
     },
-    sqlStatement: String
+    sqlStatement: String,
+    sqlID: {
+        type: Number
+    }
 });
 
 const Check = mongoose.model('check', CheckSchema);
