@@ -1,7 +1,8 @@
 const Check = require('../models/check');
 const Error = require('../errorHandling/error');
 const Errors = require('../errorHandling/errorcodes');
-const SQLConnection = require('../config/sql_database')
+const SQLConnection = require('../config/sql_database');
+const sql = require('mssql');
 
 const MongoSQL = require('mongo-sql');
 
@@ -37,22 +38,21 @@ module.exports = {
         check.sqlStatement = createQuery(sqlStatement);
 
         /** TEST QUERY ON ACTUAL DATABASE TO VERIFY VIABILITY OF CONDITION **/
-        SQLConnection.query(check.sqlStatement, (error, results) => {
-            if(error) return res.status(400).json(new Error("Invalid statement: " + error, 400))
-        })
-        SQLConnection.end()
+        SQLConnection.executeSqlStatement(sqlStatement)
+            .then(() => (console.log("Sql query executed successfully")))
+            .catch((error) => console.log(error));
 
-        let result;
-        check.save()
-            .then((checkDb) => {
-                result = checkDb;
-                /** add control check to SQL database **/
-                res.json(checkDb);
-            })
-            .catch((err) => {
-                console.error(err);
-                res.status(500).json(Errors.internalServerError());
-            });
+        // let result;
+        // check.save()
+        //     .then((checkDb) => {
+        //         result = checkDb;
+        //         /** add control check to SQL database **/
+        //         res.json(checkDb);
+        //     })
+        //     .catch((err) => {
+        //         console.error(err);
+        //         res.status(500).json(Errors.internalServerError());
+        //     });
     },
 
     getAllChecks(req, res) {
