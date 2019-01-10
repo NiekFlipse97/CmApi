@@ -43,7 +43,7 @@ app.use('/api/checks', checkRoutes)
 //     res.status('404').json(new NotFoundResponse(req.originalUrl)).end()
 // })
 
-//sqlDb.getConnection();
+sqlDb.getConnection();
 //CheckExecutor.test();
 
 // Listen on port
