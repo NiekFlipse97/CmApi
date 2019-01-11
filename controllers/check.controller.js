@@ -4,6 +4,7 @@ const Errors = require('../errorHandling/errorcodes');
 const SQLConnection = require('../config/sql_database');
 const sqlDbConnectionPool = require('../config/sql_database').connectionPool;
 const sql = require('mssql');
+const CheckExecutor = require('../checkExecutor/CheckExecutor');
 
 const MongoSQL = require('mongo-sql');
 
@@ -87,8 +88,9 @@ module.exports = {
                     executePreparedStatement(ps, check)
 
                     transaction.commit(err => {
-                        console.log(err)
+                        console.log(err);
                     })
+                        .then(() => CheckExecutor.getAllChecks());
                 })
 
                 insertCheck(check, res)
