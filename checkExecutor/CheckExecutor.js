@@ -86,12 +86,7 @@ function saveAlert(alert){
             'VALUES (@CheckID, @PaymentID, @Resolved, @AlertCreatedOn);')
             .then((prepResults) => {
                 //console.log(prepResults);
-                return preparedStatement.execute({
-                    CheckID: alert.CheckID,
-                    PaymentID: alert.PaymentID,
-                    Resolved: 0,
-                    AlertCreatedOn: alert.AlertCreatedOn
-                })
+                return preparedStatement.execute(alert)
             })
             .then((result) => resolve(result))
             .catch((error) => logCheckError(error));
