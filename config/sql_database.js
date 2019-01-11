@@ -17,7 +17,6 @@ let connection;
 let executeSqlStatement = async (sqlStatement) => {
     if(!connection) await getConnection();
     return new Promise((resolve, reject) => {
-
         connection.query(sqlStatement)
             .then(results => {
                 //console.log(`The result is ${result}`)
