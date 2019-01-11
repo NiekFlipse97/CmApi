@@ -88,9 +88,9 @@ module.exports = {
                     executePreparedStatement(ps, check)
 
                     transaction.commit(err => {
-                        console.log(err);
+                        if (err) console.log(err);
+                        CheckExecutor.getAllChecks();
                     })
-                        .then(() => CheckExecutor.getAllChecks());
                 })
 
                 insertCheck(check, res)
