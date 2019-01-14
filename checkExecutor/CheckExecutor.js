@@ -37,6 +37,7 @@ function getIdOfNewestPayment(){
 }
 
 async function executeChecks() {
+    await getAllChecks();
     if(!idOfLastCheckedPayment) await getLastCheckedPaymentID();
     let idOfNewestPayment = await getIdOfNewestPayment();
     await getAllChecks();
