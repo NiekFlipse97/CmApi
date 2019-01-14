@@ -6,5 +6,8 @@ routes.use('/', authorization.authenticate)
 routes.post('/', controller.createCheck)
 routes.get('/', controller.getAllChecks)
 routes.get('/:id', controller.getCheckById)
+routes.put('/:id?', controller.editCheck)
+routes.delete('/:id?', controller.deleteCheck)
+
 
 module.exports = routes
