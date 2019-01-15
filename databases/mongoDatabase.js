@@ -21,7 +21,7 @@ else
 {
     mongoose.connect(config.databases.mongotest_atlas, {useNewUrlParser: true})
         .then(() => {
-            console.log("Connection to the local Mongo test database has been made");
+            console.log("Connection to the online Mongo test database has been made");
         })
         .catch((err) => console.log(err));
 }

@@ -33,20 +33,23 @@ const authRoutes = require('./routes/auth.routes')
 const checkRoutes = require('./routes/check.routes')
 
 
+app.all("*", function(req, res, next)
+{
+    console.log(req.method + " " + req.url);
+    next();
+});
 // Routes
 app.get('/', (req, res) => res.send('Welcome to the CM API!'))
 app.use('/api/auth', authRoutes)
 app.use('/api/checks', checkRoutes)
 
-// Catch 404's
-// app.use('*', function (req, res) {
-//     res.status('404').json(new NotFoundResponse(req.originalUrl)).end()
-// })
+
+
 
 sqlDb.getConnection();
 CheckExecutor.getAllChecks();
-CheckExecutor.executeChecksOnInterval(5);
-//CheckExecutor.test();
+let isInTest = typeof global.it === 'function';
+if(!isInTest) CheckExecutor.executeChecksOnInterval(5);
 
 // Listen on port
 var server = app.listen(process.env.PORT || config.port, function () {

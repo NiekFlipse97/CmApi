@@ -28,23 +28,23 @@ describe('Authentication', () => {
         });
     });
 
-    xit('will return a JWT token when login is correct', (done) => {
+    it('will return a JWT token when login is correct', (done) => {
+        testUser.password = testPassword;
         chai.request(server)
-            .post('/auth')
-            .send({})
+            .post('/api/auth')
+            .send(testUser)
             .end((err, res) => {
                 res.should.have.status(200);
-                chai.assert.isNotNull(res.body);
-                let payload = authorization.decodeToken(res.body);
-                User.findById(payload.sub)
-                   .then((userDb) => {
-                       chai.assert.isNotNull(userDb);
-                       assert.strictEqual(userDb.username, testUser.username);
-                       done();
-                   })
-                   .catch((error) => {
-                       throw error;
-                   });
+                authorization.decodeToken(res.body.token, (error, payload) => {
+                    User.findById(payload.sub)
+                        .then((userDb) => {
+                            assert.strictEqual(userDb.username, testUser.username);
+                            done();
+                        })
+                        .catch((error) => {
+                            throw error;
+                        });
+                });
             });
     });
 });
