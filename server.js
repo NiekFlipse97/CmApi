@@ -4,7 +4,7 @@ const boxen = require('boxen');
 const app = express()
 const mongodb = require('./databases/mongodb')
 const CheckExecutor = require('./checkExecutor/CheckExecutor');
-const sqlDb = require('./databases/sql_database');
+const sqlDb = require('./databases/sqlDatabase');
 
 // Config
 const config = require('./config/config.json')
