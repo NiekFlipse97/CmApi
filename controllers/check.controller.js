@@ -100,8 +100,6 @@ module.exports = {
             where: req.body.condition
         };
         let sqlStatement = MongoSQL.sql(query);
-        console.log("sqlStatement is");
-        console.log(sqlStatement);
         if (new RegExp(".*(drop|alter|insert)+.*").test(sqlStatement.toString()))
             return res.status(400).json(new Error("invalid condition", 400));
         if(sqlStatement.query.includes("undefined")) return res.status(400).json(new Error("Invalid condition", 400));
@@ -114,8 +112,8 @@ module.exports = {
                 checkFromDb.description = check.description;
                 checkFromDb.condition = JSON.stringify(check.condition);
                 checkFromDb.sqlStatement = createQuery(sqlStatement);
-                testSqlQueryOnDatabase(sqlStatement)
-                    .then(() => {
+                testSqlQueryOnDatabase(checkFromDb.sqlStatement)
+                    .then((results) => {
                         if(typeof results === 'undefined') return res.status(400).json(new Error("Invalid condition", 400));
                         const transaction = new sql.Transaction(sqlDbConnectionPool);
                         transaction.begin(err => {
@@ -124,7 +122,7 @@ module.exports = {
 
                             executePreparedStatementToUpdate(ps, checkFromDb)
                                 .then(() => checkFromDb.save())
-                                .then(() => res.status(204).json(checkFromDb))
+                                .then(() => res.status(204).end())
                                 .catch((error) => {
                                     console.log(error);
                                     res.status(500).json(Errors.internalServerError());
