@@ -382,7 +382,7 @@ describe('Checks', () => {
 
 
     /*****************      DELETE checks     **********************/
-    it.only('can delete a check', (done) => {
+    it('can delete a check', (done) => {
         chai.request(server)
             .delete(`/api/checks/${testCheck._id}`)
             .set('X-Access-Token', JWT)
@@ -391,7 +391,13 @@ describe('Checks', () => {
                 Check.find()
                     .then((checks) => {
                         assert.strictEqual(checks.length, 0);
-                        done();
+
+                        SQLConnection.executeSqlStatement("SELECT * FROM ControlChecks WHERE ID = " + testCheck.sqlID)
+                            .then((results) => {
+                                let checkFromSQLDb = results.recordset[0];
+                                chai.assert.isUndefined(checkFromSQLDb);
+                                done();
+                            });
                     })
             });
     });
@@ -404,7 +410,13 @@ describe('Checks', () => {
                 Check.find()
                     .then((checks) => {
                         assert.strictEqual(checks.length, 1);
-                        done();
+
+                        SQLConnection.executeSqlStatement("SELECT * FROM ControlChecks WHERE ID = " + testCheck.sqlID)
+                            .then((results) => {
+                                let checkFromSQLDb = results.recordset[0];
+                                chai.assert.isDefined(checkFromSQLDb);
+                                done();
+                            });
                     })
             });
     });
@@ -418,8 +430,14 @@ describe('Checks', () => {
                 Check.find()
                     .then((checks) => {
                         assert.strictEqual(checks.length, 1);
-                        done();
-                    })
+
+                        SQLConnection.executeSqlStatement("SELECT * FROM ControlChecks WHERE ID = " + testCheck.sqlID)
+                            .then((results) => {
+                                let checkFromSQLDb = results.recordset[0];
+                                chai.assert.isDefined(checkFromSQLDb);
+                                done();
+                            });
+                    });
             });
     });
 });
