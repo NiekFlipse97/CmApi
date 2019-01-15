@@ -114,7 +114,7 @@ module.exports = {
                             let ps = createPreparedStatement();
                             ps.input("ID", sql.Int);
 
-                            executePreparedStatementToInsert(ps, updatedCheck);
+                            executePreparedStatementToUpdate(ps, updatedCheck);
 
                             transaction.commit(err => {
                                 if (err) console.log(err);
@@ -224,7 +224,6 @@ let insertCheck = (check, res) => {
             check.save()
                 .then((checkDb) => {
                     result = checkDb;
-                    /** add control check to SQL database **/
                     res.json(checkDb);
                 })
                 .catch((err) => {
