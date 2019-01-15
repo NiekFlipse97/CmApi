@@ -2,7 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const boxen = require('boxen');
 const app = express()
-const mongodb = require('./databases/mongodb')
+const mongodb = require('./databases/mongoDatabase')
 const CheckExecutor = require('./checkExecutor/CheckExecutor');
 const sqlDb = require('./databases/sqlDatabase');
 
