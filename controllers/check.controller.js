@@ -39,14 +39,13 @@ module.exports = {
                 transaction.begin(err => {
                     let ps = createPreparedStatement();
 
-                    executePreparedStatementToInsert(ps, check);
+                    executePreparedStatementToInsert(ps, check)
+                        .then(() => insertCheck(check, res));
 
                     transaction.commit(err => {
                         if (err) console.log(err);
                     })
                 });
-
-                insertCheck(check, res)
             })
             .catch((error) => console.log(error));
     },
@@ -54,7 +53,7 @@ module.exports = {
     getAllChecks(req, res) {
         Check.find({})
             .then(checks => {
-                res.status(200).json(checks).end()
+                res.status(200).json(checks)
             })
             .catch(error => {
                 res.status(500).json(error)
@@ -62,15 +61,16 @@ module.exports = {
     },
 
     getCheckById(req, res) {
-        let id = req.params.id
+        let id = req.params.id;
 
         Check.findById(id)
             .then(check => {
-                res.status(200).json(check).end()
+                if(!check) throw new Errors.notFound();
+                res.status(200).json(check)
             })
             .catch(error => {
-                let err = Errors.notFound()
-                res.status(err.code).json(err).end()
+                let err = Errors.notFound();
+                res.status(err.code).json(err)
             })
     },
 
@@ -114,7 +114,8 @@ module.exports = {
                             let ps = createPreparedStatement();
                             ps.input("ID", sql.Int);
 
-                            executePreparedStatementToUpdate(ps, updatedCheck);
+                            executePreparedStatementToUpdate(ps, updatedCheck)
+                                .then(() => insertCheck(check, res));
 
                             transaction.commit(err => {
                                 if (err) console.log(err);
@@ -189,36 +190,46 @@ let createPreparedStatement = () => {
 
 
 let executePreparedStatementToInsert = (ps, check) => {
-    ps.prepare('INSERT INTO ControlChecks(Name, Description) VALUES(@Name, @Description);')
-        .then((prepResults) => {
-            ps.execute({
-                Name: check.name,
-                Description: check.description
+    return new Promise((resolve, reject) => {
+        ps.prepare('INSERT INTO ControlChecks(Name, Description) VALUES(@Name, @Description);')
+            .then((prepResults) => {
+                ps.execute({
+                    Name: check.name,
+                    Description: check.description
+                })
+                .then((results) => {
+                    resolve(results);
+                })
             })
-        })
-        .catch((error) => {
-            console.log(error)
-        })
+            .catch((error) => {
+                console.log(error)
+            })
+    })
 };
 
 let executePreparedStatementToUpdate = (ps, check) => {
-    ps.prepare('UPDATE ControlChecks SET Name = @Name, Description = @Description WHERE ID = @ID')
-        .then((prepResults) => {
-            ps.execute({
-                Name: check.name,
-                Description: check.description,
-                ID: check.sqlID
+    return new Promise((resolve, reject) => {
+        ps.prepare('UPDATE ControlChecks SET Name = @Name, Description = @Description WHERE ID = @ID')
+            .then((prepResults) => {
+                ps.execute({
+                    Name: check.name,
+                    Description: check.description,
+                    ID: check.sqlID
+                })
+                    .then((results) => {
+                        resolve(results);
+                    })
             })
-        })
-        .catch((error) => {
-            console.log(error)
-        })
+            .catch((error) => {
+                console.log(error)
+            })
+    });
 };
 
 let insertCheck = (check, res) => {
     SQLConnection.executeSqlStatement('SELECT TOP 1 * FROM ControlChecks ORDER BY ID DESC')
         .then(result => {
-            check.sqlID = result.recordset[0].ID
+            check.sqlID = result.recordset[0].ID;
 
             check.save()
                 .then((checkDb) => {

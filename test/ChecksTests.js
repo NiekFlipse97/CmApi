@@ -45,7 +45,7 @@ describe('Checks', () => {
     });
 
     /*****************      POST checks     **********************/
-    it.only('can create a check', (done) => {
+    it('can create a check', (done) => {
         let check = {name: "Testing Check", description: "Check for testing", condition: {MerchantAmount: 200}};
         let checkFromDatabase;
         chai.request(server)
@@ -202,18 +202,19 @@ describe('Checks', () => {
             });
     });
 
-    it('will not get a check by id without JWT', (done) => {
+    it('will not get a check by id without a correct check id', (done) => {
         chai.request(server)
-            .get(`/api/checks/${testCheck._id}`)
+            .get(`/api/checks/doesnotexist`)
+            .set('X-Access-Token', JWT)
             .end((err, res) => {
-                res.should.have.status(401);
+                res.should.have.status(404);
                 done();
             });
     });
 
 
     /*****************      PUT checks     **********************/
-    it('can edit a check', (done) => {
+    it.only('can edit a check', (done) => {
         let check = {name: "Testing Check2", description: "Check for testing2", condition: {MerchantAmount: 300}};
 
         chai.request(server)
