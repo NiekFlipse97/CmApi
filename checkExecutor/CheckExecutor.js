@@ -40,17 +40,12 @@ async function executeChecks() {
     await getAllChecks();
     if(!idOfLastCheckedPayment) await getLastCheckedPaymentID();
     let idOfNewestPayment = await getIdOfNewestPayment();
-    await getAllChecks();
-    //console.log("idOfLastCheckedPayment: " + idOfLastCheckedPayment);
-    //console.log("idOfNewestPayment: " + idOfNewestPayment);
 
     for(let check of checks){
-        //console.log(check);
         let sqlStatement = check.sqlStatement + ' AND "Payments"."id" > ' + idOfLastCheckedPayment +
             ' AND "Payments"."id" <= ' + idOfNewestPayment + ';';
         sqlDb.executeSqlStatement(sqlStatement)
             .then((results) => {
-                //console.log(results);
                 createAlertsForAllFailedChecks(results.recordset, check.sqlID)
             })
             .catch((error) => logCheckError(error));
