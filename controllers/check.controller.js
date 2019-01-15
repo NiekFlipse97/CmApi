@@ -120,7 +120,6 @@ module.exports = {
                                 if (err) console.log(err);
                                 Check.findByIdAndUpdate(updatedCheck.ID, updatedCheck)
                                     .then(() => {
-                                        delete updatedCheck.sqlID;
                                         res.status(204).json(updatedCheck);
                                     })
                             })

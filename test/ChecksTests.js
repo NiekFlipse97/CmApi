@@ -46,9 +46,8 @@ describe('Checks', () => {
 
     /*****************      POST checks     **********************/
     it.only('can create a check', (done) => {
-        console.log("In the IT");
         let check = {name: "Testing Check", description: "Check for testing", condition: {MerchantAmount: 200}};
-
+        let checkFromDatabase;
         chai.request(server)
             .post('/api/checks')
             .send(check)
@@ -58,10 +57,14 @@ describe('Checks', () => {
 
                 Check.findOne({name: check.name})
                     .then((checkFromDb) => {
-                        chai.assert.isNotNull(checkFromDb);
-                        chai.assert.isNotNull(checkFromDb.sqlStatement);
-                        assert.strictEqual(checkFromDb.sqlStatement, 'select "payments".* from "payments" ' +
+                        checkFromDatabase = checkFromDb;
+                        chai.assert.isNotNull(checkFromDatabase);
+                        assert.strictEqual(checkFromDatabase.sqlStatement, 'select "payments".* from "payments" ' +
                             'where "payments"."MerchantAmount" = 200');
+                        return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
+                    })
+                    .then((results) => {
+                        assert.strictEqual(results.recordset[0].ID, checkFromDatabase.sqlID);
                         done();
                     });
             });
