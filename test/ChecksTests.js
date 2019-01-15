@@ -214,7 +214,7 @@ describe('Checks', () => {
 
 
     /*****************      PUT checks     **********************/
-    it.only('can edit a check', (done) => {
+    it('can edit a check', (done) => {
         let check = {name: "Testing Check2", description: "Check for testing2", condition: {MerchantAmount: 300}};
 
         chai.request(server)
@@ -224,17 +224,21 @@ describe('Checks', () => {
             .end((err, res) => {
                 res.should.have.status(204);
 
-                Check.find()
-                    .then((checks) => {
-                        assert.strictEqual(checks.length, 1);
-                        let checkDb = checks[0];
-                        assert.strictEqual(checkDb.name, check.name);
-                        assert.strictEqual(checkDb.description, check.description);
-                        assert.strictEqual(checkDb.condition, JSON.stringify(check.condition));
-                        assert.strictEqual(checkDb.sqlStatement, 'select "payments".* from "payments" ' +
+                Check.findById(testCheck._id)
+                    .then((checkFromDb) => {
+                        assert.strictEqual(checkFromDb.name, check.name);
+                        assert.strictEqual(checkFromDb.description, check.description);
+                        assert.strictEqual(JSON.parse(checkFromDb.condition), JSON.stringify(check.condition));
+                        assert.strictEqual(checkFromDb.sqlStatement, 'select "payments".* from "payments" ' +
                             'where "payments"."MerchantAmount" = 300');
 
-                        done();
+                        SQLConnection.executeSqlStatement("SELECT * FROM ControlChecks WHERE ID = " + checkFromDb.sqlID)
+                            .then((results) => {
+                                let checkFromSQLDb = results.recordset[0];
+                                assert.strictEqual(checkFromSQLDb.Name, check.name);
+                                assert.strictEqual(checkFromSQLDb.Description, check.description);
+                                done();
+                            });
                     });
             });
     });
@@ -248,16 +252,20 @@ describe('Checks', () => {
             .end((err, res) => {
                 res.should.have.status(401);
 
-                Check.find()
-                    .then((checks) => {
-                        assert.strictEqual(checks.length, 1);
-                        let checkDb = checks[0];
-                        assert.strictEqual(checkDb.name, testCheck.name);
-                        assert.strictEqual(checkDb.description, testCheck.description);
-                        assert.strictEqual(checkDb.condition, testCheck.condition);
-                        assert.strictEqual(checkDb.sqlStatement, testCheck.sqlStatement);
+                Check.findById(testCheck._id)
+                    .then((checkFromDb) => {
+                        assert.strictEqual(checkFromDb.name, testCheck.name);
+                        assert.strictEqual(checkFromDb.description, testCheck.description);
+                        assert.strictEqual(checkFromDb.condition, testCheck.condition);
+                        assert.strictEqual(checkFromDb.sqlStatement, testCheck.sqlStatement);
 
-                        done();
+                        SQLConnection.executeSqlStatement("SELECT * FROM ControlChecks WHERE ID = " + checkFromDb.sqlID)
+                            .then((results) => {
+                                let checkFromSQLDb = results.recordset[0];
+                                assert.strictEqual(checkFromSQLDb.Name, testCheck.name);
+                                assert.strictEqual(checkFromSQLDb.Description, testCheck.description);
+                                done();
+                            });
                     });
             });
     });
@@ -271,16 +279,20 @@ describe('Checks', () => {
             .end((err, res) => {
                 res.should.have.status(401);
 
-                Check.find()
-                    .then((checks) => {
-                        assert.strictEqual(checks.length, 1);
-                        let checkDb = checks[0];
-                        assert.strictEqual(checkDb.name, testCheck.name);
-                        assert.strictEqual(checkDb.description, testCheck.description);
-                        assert.strictEqual(checkDb.condition, testCheck.condition);
-                        assert.strictEqual(checkDb.sqlStatement, testCheck.sqlStatement);
+                Check.findById(testCheck._id)
+                    .then((checkFromDb) => {
+                        assert.strictEqual(checkFromDb.name, testCheck.name);
+                        assert.strictEqual(checkFromDb.description, testCheck.description);
+                        assert.strictEqual(checkFromDb.condition, testCheck.condition);
+                        assert.strictEqual(checkFromDb.sqlStatement, testCheck.sqlStatement);
 
-                        done();
+                        SQLConnection.executeSqlStatement("SELECT * FROM ControlChecks WHERE ID = " + checkFromDb.sqlID)
+                            .then((results) => {
+                                let checkFromSQLDb = results.recordset[0];
+                                assert.strictEqual(checkFromSQLDb.Name, testCheck.name);
+                                assert.strictEqual(checkFromSQLDb.Description, testCheck.description);
+                                done();
+                            });
                     });
             });
     });
@@ -295,16 +307,20 @@ describe('Checks', () => {
             .end((err, res) => {
                 res.should.have.status(400);
 
-                Check.find()
-                    .then((checks) => {
-                        assert.strictEqual(checks.length, 1);
-                        let checkDb = checks[0];
-                        assert.strictEqual(checkDb.name, testCheck.name);
-                        assert.strictEqual(checkDb.description, testCheck.description);
-                        assert.strictEqual(checkDb.condition, testCheck.condition);
-                        assert.strictEqual(checkDb.sqlStatement, testCheck.sqlStatement);
+                Check.findById(testCheck._id)
+                    .then((checkFromDb) => {
+                        assert.strictEqual(checkFromDb.name, testCheck.name);
+                        assert.strictEqual(checkFromDb.description, testCheck.description);
+                        assert.strictEqual(checkFromDb.condition, testCheck.condition);
+                        assert.strictEqual(checkFromDb.sqlStatement, testCheck.sqlStatement);
 
-                        done();
+                        SQLConnection.executeSqlStatement("SELECT * FROM ControlChecks WHERE ID = " + checkFromDb.sqlID)
+                            .then((results) => {
+                                let checkFromSQLDb = results.recordset[0];
+                                assert.strictEqual(checkFromSQLDb.Name, testCheck.name);
+                                assert.strictEqual(checkFromSQLDb.Description, testCheck.description);
+                                done();
+                            });
                     });
             });
     });
@@ -319,16 +335,20 @@ describe('Checks', () => {
             .end((err, res) => {
                 res.should.have.status(400);
 
-                Check.find()
-                    .then((checks) => {
-                        assert.strictEqual(checks.length, 1);
-                        let checkDb = checks[0];
-                        assert.strictEqual(checkDb.name, testCheck.name);
-                        assert.strictEqual(checkDb.description, testCheck.description);
-                        assert.strictEqual(checkDb.condition, testCheck.condition);
-                        assert.strictEqual(checkDb.sqlStatement, testCheck.sqlStatement);
+                Check.findById(testCheck._id)
+                    .then((checkFromDb) => {
+                        assert.strictEqual(checkFromDb.name, testCheck.name);
+                        assert.strictEqual(checkFromDb.description, testCheck.description);
+                        assert.strictEqual(checkFromDb.condition, testCheck.condition);
+                        assert.strictEqual(checkFromDb.sqlStatement, testCheck.sqlStatement);
 
-                        done();
+                        SQLConnection.executeSqlStatement("SELECT * FROM ControlChecks WHERE ID = " + checkFromDb.sqlID)
+                            .then((results) => {
+                                let checkFromSQLDb = results.recordset[0];
+                                assert.strictEqual(checkFromSQLDb.Name, testCheck.name);
+                                assert.strictEqual(checkFromSQLDb.Description, testCheck.description);
+                                done();
+                            });
                     });
             });
     });
@@ -343,23 +363,26 @@ describe('Checks', () => {
             .end((err, res) => {
                 res.should.have.status(400);
 
-                Check.find()
-                    .then((checks) => {
-                        assert.strictEqual(checks.length, 1);
-                        let checkDb = checks[0];
-                        assert.strictEqual(checkDb.name, testCheck.name);
-                        assert.strictEqual(checkDb.description, testCheck.description);
-                        assert.strictEqual(checkDb.condition, testCheck.condition);
-                        assert.strictEqual(checkDb.sqlStatement, testCheck.sqlStatement);
+                Check.findById(testCheck._id)
+                    .then((checkFromDb) => {
+                        assert.strictEqual(checkFromDb.name, testCheck.name);
+                        assert.strictEqual(checkFromDb.description, testCheck.description);
+                        assert.strictEqual(checkFromDb.sqlStatement, testCheck.sqlStatement);
 
-                        done();
+                        SQLConnection.executeSqlStatement("SELECT * FROM ControlChecks WHERE ID = " + checkFromDb.sqlID)
+                            .then((results) => {
+                                let checkFromSQLDb = results.recordset[0];
+                                assert.strictEqual(checkFromSQLDb.Name, testCheck.name);
+                                assert.strictEqual(checkFromSQLDb.Description, testCheck.description);
+                                done();
+                            });
                     });
             });
     });
 
 
     /*****************      DELETE checks     **********************/
-    it('can delete a check', (done) => {
+    it.only('can delete a check', (done) => {
         chai.request(server)
             .delete(`/api/checks/${testCheck._id}`)
             .set('X-Access-Token', JWT)

@@ -97,16 +97,15 @@ module.exports = {
         let sqlStatement = MongoSQL.sql(query);
         if (new RegExp(".*(drop|alter|insert)+.*").test(sqlStatement.toString()))
             return res.status(400).json(new Error("invalid condition", 400));
-        check.sqlStatement = createQuery(sqlStatement);
 
         // database stuff
         Check.findById(id)
             .then((checkFromDb) => {
-                check.sqlID = checkFromDb;
-                let updatedCheck = checkFromDb;
-                updatedCheck.Name = check.Name;
-                updatedCheck.Description = check.Description;
-                res.status(400).json(new Error("No check exists with that id", 400));
+                if(!checkFromDb) res.status(400).json(new Error("No check exists with that id", 400));
+                checkFromDb.name = check.name;
+                checkFromDb.description = check.description;
+                checkFromDb.condition = JSON.stringify(check.condition);
+                checkFromDb.sqlStatement = createQuery(sqlStatement);
                 testSqlQueryOnDatabase(sqlStatement)
                     .then(() => {
                         const transaction = new sql.Transaction(sqlDbConnectionPool);
@@ -114,15 +113,16 @@ module.exports = {
                             let ps = createPreparedStatement();
                             ps.input("ID", sql.Int);
 
-                            executePreparedStatementToUpdate(ps, updatedCheck)
-                                .then(() => insertCheck(check, res));
+                            executePreparedStatementToUpdate(ps, checkFromDb)
+                                .then(() => checkFromDb.save())
+                                .then(() => res.status(204).json(checkFromDb))
+                                .catch((error) => {
+                                    console.log(error);
+                                    res.status(500).json(Errors.internalServerError());
+                                });
 
                             transaction.commit(err => {
                                 if (err) console.log(err);
-                                Check.findByIdAndUpdate(updatedCheck.ID, updatedCheck)
-                                    .then(() => {
-                                        res.status(204).json(updatedCheck);
-                                    })
                             })
                         });
 
