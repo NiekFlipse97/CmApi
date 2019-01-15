@@ -2,7 +2,9 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const boxen = require('boxen');
 const app = express()
-const mongodb = require('./databases/mongodb')
+const mongodb = require('./databases/mongoDatabase')
+const CheckExecutor = require('./checkExecutor/CheckExecutor');
+const sqlDb = require('./databases/sqlDatabase');
 
 // Config
 const config = require('./config/config.json')
@@ -40,6 +42,11 @@ app.use('/api/checks', checkRoutes)
 // app.use('*', function (req, res) {
 //     res.status('404').json(new NotFoundResponse(req.originalUrl)).end()
 // })
+
+sqlDb.getConnection();
+CheckExecutor.getAllChecks();
+CheckExecutor.executeChecksOnInterval(5);
+//CheckExecutor.test();
 
 // Listen on port
 var server = app.listen(process.env.PORT || config.port, function () {

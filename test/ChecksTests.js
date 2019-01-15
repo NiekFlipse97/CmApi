@@ -36,6 +36,8 @@ describe('Authentication', () => {
         });
     });
 
+
+    /** GET Checks **/
     it('can get checks', (done) => {
         let testCheck2 = new Check({name: "testName2", description: "testDescription2", condition: 'MerchantAmount: 0',
             sqlStatement: 'SELECT "Payments".* FROM "Payments" WHERE "Payments"."MerchantAmount" = 0'});
@@ -86,4 +88,15 @@ describe('Authentication', () => {
                 done();
             });
     });
+
+
+    /** POST Checks **/
+
+
+
+    /** PUT Checks **/
+
+    
+
+    /** DELETE Checks **/
 });
