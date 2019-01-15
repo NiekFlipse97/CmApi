@@ -45,7 +45,7 @@ describe('Checks', () => {
     });
 
     /*****************      POST checks     **********************/
-    it('can create a check', (done) => {
+    it.only('can create a check', (done) => {
         let check = {name: "Testing Check", description: "Check for testing", condition: {MerchantAmount: 200}};
         let checkFromDatabase;
         chai.request(server)
@@ -138,6 +138,50 @@ describe('Checks', () => {
 
     it('will not create a check without a condition', (done) => {
         let check = {name: "Testing Check", description: "Check for testing"};
+
+        chai.request(server)
+            .post('/api/checks')
+            .send(check)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(400);
+
+                Check.findOne({name: check.name})
+                    .then((check) => {
+                        chai.assert.isNull(check);
+                        return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
+                    })
+                    .then((results) => {
+                        assert.strictEqual(results.recordset[0].ID, testCheck.sqlID);
+                        done();
+                    })
+            });
+    });
+
+    it.only('will not create a check with a incorrect condition', (done) => {
+        let check = {name: "Testing Check", description: "Check for testing", condition: "not a valid condition"};
+
+        chai.request(server)
+            .post('/api/checks')
+            .send(check)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(400);
+
+                Check.findOne({name: check.name})
+                    .then((check) => {
+                        chai.assert.isNull(check);
+                        return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
+                    })
+                    .then((results) => {
+                        assert.strictEqual(results.recordset[0].ID, testCheck.sqlID);
+                        done();
+                    })
+            });
+    });
+
+    it.only('will not create a check with a incorrect condition', (done) => {
+        let check = {name: "Testing Check", description: "Check for testing", condition: {NotExistentColumn: 500}};
 
         chai.request(server)
             .post('/api/checks')
