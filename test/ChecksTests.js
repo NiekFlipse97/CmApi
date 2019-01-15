@@ -12,7 +12,7 @@ const SQLConnection = require('../databases/sqlDatabase');
 chai.should();
 chai.use(chaiHttp);
 
-describe('Authentication', () => {
+describe('Checks', () => {
     let JWT;
     let testCheck;
 
@@ -21,8 +21,8 @@ describe('Authentication', () => {
             sqlStatement: 'select "payments".* FROM "payments" WHERE "payments"."MerchantAmount" > 200'});
         let testPassword = "testPassword";
 
-        SQLConnection.executeSqlStatement("INSERT INTO ControlChecks(Name, Description) VALUES (" + testCheck.name +
-            "," + testCheck.description + ");")
+        SQLConnection.executeSqlStatement("INSERT INTO ControlChecks (Name, Description) VALUES (\'" + testCheck.name + "\'" +
+            ", \'" + testCheck.description + "\');")
             .then(() => SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;"))
             .then((results) => {
                 testCheck.sqlID = results.recordset[0].ID;
@@ -44,9 +44,9 @@ describe('Authentication', () => {
         });
     });
 
-
-    /** POST checks **/
-    it('can create a check', (done) => {
+    /*****************      POST checks     **********************/
+    it.only('can create a check', (done) => {
+        console.log("In the IT");
         let check = {name: "Testing Check", description: "Check for testing", condition: {MerchantAmount: 200}};
 
         chai.request(server)
@@ -57,10 +57,10 @@ describe('Authentication', () => {
                 res.should.have.status(200);
 
                 Check.findOne({name: check.name})
-                    .then((check) => {
-                        chai.assert.isNotNull(check);
-                        chai.assert.isNotNull(check.sqlStatement);
-                        assert.strictEqual(check.sqlStatement, 'select "payments".* from "payments" ' +
+                    .then((checkFromDb) => {
+                        chai.assert.isNotNull(checkFromDb);
+                        chai.assert.isNotNull(checkFromDb.sqlStatement);
+                        assert.strictEqual(checkFromDb.sqlStatement, 'select "payments".* from "payments" ' +
                             'where "payments"."MerchantAmount" = 200');
                         done();
                     });
@@ -79,8 +79,12 @@ describe('Authentication', () => {
                 Check.findOne({name: check.name})
                     .then((check) => {
                         chai.assert.isNull(check);
+                        return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
+                    })
+                    .then((results) => {
+                        assert.strictEqual(results.recordset[0].ID, testCheck.sqlID);
                         done();
-                    });
+                    })
             });
     });
 
@@ -95,10 +99,15 @@ describe('Authentication', () => {
                 res.should.have.status(400);
 
                 Check.findOne({description: check.description})
-                    .then((check) => {
-                        chai.assert.isNull(check);
+                    .then((checkFromDb) => {
+                        chai.assert.isNull(checkFromDb);
+
+                        return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
+                    })
+                    .then((results) => {
+                        assert.strictEqual(results.recordset[0].ID, testCheck.sqlID);
                         done();
-                    });
+                    })
             });
     });
 
@@ -115,8 +124,12 @@ describe('Authentication', () => {
                 Check.findOne({name: check.name})
                     .then((check) => {
                         chai.assert.isNull(check);
+                        return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
+                    })
+                    .then((results) => {
+                        assert.strictEqual(results.recordset[0].ID, testCheck.sqlID);
                         done();
-                    });
+                    })
             });
     });
 
@@ -133,13 +146,17 @@ describe('Authentication', () => {
                 Check.findOne({name: check.name})
                     .then((check) => {
                         chai.assert.isNull(check);
+                        return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
+                    })
+                    .then((results) => {
+                        assert.strictEqual(results.recordset[0].ID, testCheck.sqlID);
                         done();
-                    });
+                    })
             });
     });
 
 
-    /** GET checks**/
+    /*****************      GET checks     **********************/
     it('can get checks', (done) => {
         let testCheck2 = new Check({name: "testName2", description: "testDescription2", condition: 'MerchantAmount: 0',
             sqlStatement: 'SELECT "Payments".* FROM "Payments" WHERE "Payments"."MerchantAmount" = 0'});
@@ -192,7 +209,7 @@ describe('Authentication', () => {
     });
 
 
-    /** PUT checks **/
+    /*****************      PUT checks     **********************/
     it('can edit a check', (done) => {
         let check = {name: "Testing Check2", description: "Check for testing2", condition: {MerchantAmount: 300}};
 
@@ -337,7 +354,7 @@ describe('Authentication', () => {
     });
 
 
-    /** DELETE checks **/
+    /*****************      DELETE checks     **********************/
     it('can delete a check', (done) => {
         chai.request(server)
             .delete(`/api/checks/${testCheck._id}`)
