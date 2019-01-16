@@ -70,6 +70,31 @@ describe('Checks', () => {
             });
     });
 
+    it('can create a check with a condition containing a Mongo operator', (done) => {
+        let check = {name: "Testing Check", description: "Check for testing", condition: {MerchantAmount: {$gt: 200}}};
+        let checkFromDatabase;
+        chai.request(server)
+            .post('/api/checks')
+            .send(check)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(200);
+
+                Check.findOne({name: check.name})
+                    .then((checkFromDb) => {
+                        checkFromDatabase = checkFromDb;
+                        chai.assert.isNotNull(checkFromDatabase);
+                        assert.strictEqual(checkFromDatabase.sqlStatement, 'select "payments".* from "payments" ' +
+                            'where "payments"."MerchantAmount" > 200');
+                        return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
+                    })
+                    .then((results) => {
+                        assert.strictEqual(results.recordset[0].ID, checkFromDatabase.sqlID);
+                        done();
+                    });
+            });
+    });
+
     it('will not create a check without a JWT', (done) => {
         let check = {name: "Testing Check", description: "Check for testing", condition: {MerchantAmount: 200}};
 
@@ -158,6 +183,50 @@ describe('Checks', () => {
             });
     });
 
+    it('will not create a check with a nonsensical condition', (done) => {
+        let check = {name: "Testing Check", description: "Check for testing", condition: "a nonsensical condition"};
+
+        chai.request(server)
+            .post('/api/checks')
+            .send(check)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(400);
+
+                Check.findOne({name: check.name})
+                    .then((check) => {
+                        chai.assert.isNull(check);
+                        return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
+                    })
+                    .then((results) => {
+                        assert.strictEqual(results.recordset[0].ID, testCheck.sqlID);
+                        done();
+                    })
+            });
+    });
+
+    it('will not create a check with a condition refering to a nonexistent column', (done) => {
+        let check = {name: "Testing Check", description: "Check for testing", condition: {NotExistentColumn: 500}};
+
+        chai.request(server)
+            .post('/api/checks')
+            .send(check)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(400);
+
+                Check.findOne({name: check.name})
+                    .then((check) => {
+                        chai.assert.isNull(check);
+                        return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
+                    })
+                    .then((results) => {
+                        assert.strictEqual(results.recordset[0].ID, testCheck.sqlID);
+                        done();
+                    })
+            });
+    });
+
 
     /*****************      GET checks     **********************/
     it('can get checks', (done) => {
@@ -183,6 +252,15 @@ describe('Checks', () => {
     it('will not get checks without JWT', (done) => {
         chai.request(server)
             .get('/api/checks')
+            .end((err, res) => {
+                res.should.have.status(401);
+                done();
+            });
+    });
+
+    it('will not get a check by id without JWT', (done) => {
+        chai.request(server)
+            .get('/api/checks/' + testCheck._id)
             .end((err, res) => {
                 res.should.have.status(401);
                 done();
@@ -240,6 +318,28 @@ describe('Checks', () => {
                                 done();
                             });
                     });
+            });
+    });
+
+    it('will not edit a check with a incorrect id', (done) => {
+        let check = {name: "Testing Check", description: "Check for testing", condition: "a nonsensical condition"};
+
+        chai.request(server)
+            .put('/api/checks/doesnotexist')
+            .send(check)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(400);
+
+                Check.findById(testCheck._id)
+                    .then((checkFromDb) => {
+                        assert.strictEqual(checkFromDb.name, testCheck.name);
+                        assert.strictEqual(checkFromDb.description, testCheck.description);
+                        assert.strictEqual(checkFromDb.condition, testCheck.condition);
+                        assert.strictEqual(checkFromDb.sqlID, testCheck.sqlID);
+                        assert.strictEqual(checkFromDb.sqlStatement, testCheck.sqlStatement);
+                        done();
+                    })
             });
     });
 
@@ -377,6 +477,50 @@ describe('Checks', () => {
                                 done();
                             });
                     });
+            });
+    });
+
+    it('will not edit a check with a nonsensical condition', (done) => {
+        let check = {name: "Testing Check", description: "Check for testing", condition: "a nonsensical condition"};
+
+        chai.request(server)
+            .put('/api/checks/' + testCheck._id)
+            .send(check)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(400);
+
+                Check.findById(testCheck._id)
+                    .then((check) => {
+                        assert.strictEqual(check.name, testCheck.name);
+                        assert.strictEqual(check.description, testCheck.description);
+                        assert.strictEqual(check.condition, testCheck.condition);
+                        assert.strictEqual(check.sqlID, testCheck.sqlID);
+                        assert.strictEqual(check.sqlStatement, testCheck.sqlStatement);
+                        done();
+                    })
+            });
+    });
+
+    it('will not edit a check with a condition refering to a nonexistent column', (done) => {
+        let check = {name: "Testing Check", description: "Check for testing", condition: {NotExistentColumn: 500}};
+
+        chai.request(server)
+            .put('/api/checks/' + testCheck._id)
+            .send(check)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(400);
+
+                Check.findById(testCheck._id)
+                    .then((check) => {
+                        assert.strictEqual(check.name, testCheck.name);
+                        assert.strictEqual(check.description, testCheck.description);
+                        assert.strictEqual(check.condition, testCheck.condition);
+                        assert.strictEqual(check.sqlID, testCheck.sqlID);
+                        assert.strictEqual(check.sqlStatement, testCheck.sqlStatement);
+                        done();
+                    })
             });
     });
 

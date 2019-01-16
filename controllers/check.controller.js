@@ -31,10 +31,12 @@ module.exports = {
         if (new RegExp(".*(drop|alter|insert)+.*").test(sqlStatement.toString()))
             return res.status(400).json(new Error("invalid condition", 400));
         check.sqlStatement = createQuery(sqlStatement);
+        if(sqlStatement.query.includes("undefined")) return res.status(400).json(new Error("Invalid condition", 400));
 
         /** TEST QUERY ON ACTUAL DATABASE TO VERIFY VIABILITY OF CONDITION **/
-        testSqlQueryOnDatabase(sqlStatement)
-            .then(() => {
+        testSqlQueryOnDatabase(check.sqlStatement)
+            .then((results) => {
+                if(typeof results === 'undefined') return res.status(400).json(new Error("Invalid condition", 400));
                 const transaction = new sql.Transaction(sqlDbConnectionPool);
                 transaction.begin(err => {
                     let ps = createPreparedStatement();
@@ -47,7 +49,10 @@ module.exports = {
                     })
                 });
             })
-            .catch((error) => console.log(error));
+            .catch((error) => {
+                res.status(400).json(new Error("invalid condition", 400));
+                if(error) console.log(error);
+            });
     },
 
     getAllChecks(req, res) {
@@ -97,6 +102,7 @@ module.exports = {
         let sqlStatement = MongoSQL.sql(query);
         if (new RegExp(".*(drop|alter|insert)+.*").test(sqlStatement.toString()))
             return res.status(400).json(new Error("invalid condition", 400));
+        if(sqlStatement.query.includes("undefined")) return res.status(400).json(new Error("Invalid condition", 400));
 
         // database stuff
         Check.findById(id)
@@ -106,8 +112,9 @@ module.exports = {
                 checkFromDb.description = check.description;
                 checkFromDb.condition = JSON.stringify(check.condition);
                 checkFromDb.sqlStatement = createQuery(sqlStatement);
-                testSqlQueryOnDatabase(sqlStatement)
-                    .then(() => {
+                testSqlQueryOnDatabase(checkFromDb.sqlStatement)
+                    .then((results) => {
+                        if(typeof results === 'undefined') return res.status(400).json(new Error("Invalid condition", 400));
                         const transaction = new sql.Transaction(sqlDbConnectionPool);
                         transaction.begin(err => {
                             let ps = createPreparedStatement();
@@ -115,7 +122,7 @@ module.exports = {
 
                             executePreparedStatementToUpdate(ps, checkFromDb)
                                 .then(() => checkFromDb.save())
-                                .then(() => res.status(204).json(checkFromDb))
+                                .then(() => res.status(204).end())
                                 .catch((error) => {
                                     console.log(error);
                                     res.status(500).json(Errors.internalServerError());
@@ -127,7 +134,10 @@ module.exports = {
                         });
 
                     })
-                    .catch((error) => console.log(error));
+                    .catch((error) => {
+                        res.status(400).json(new Error("Invalid condition", 400));
+                        if(error) console.log(error)
+                    });
             })
             .catch((error) =>{
                 console.log(error);
@@ -164,8 +174,8 @@ module.exports = {
 function testSqlQueryOnDatabase(sqlStatement){
     return new Promise((resolve, reject) => {
         SQLConnection.executeSqlStatement(sqlStatement)
-            .then(() => {
-                resolve();
+            .then((results) => {
+                resolve(results);
             })
             .catch(() => reject())
     })

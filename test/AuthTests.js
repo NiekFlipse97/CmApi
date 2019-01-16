@@ -47,4 +47,65 @@ describe('Authentication', () => {
                 });
             });
     });
+
+    it('will not return a JWT token when password is incorrect', (done) => {
+        testUser.password = testPassword;
+        chai.request(server)
+            .post('/api/auth')
+            .send({
+                username: testUser.username,
+                password: "not" + testPassword
+            })
+            .end((err, res) => {
+                res.should.have.status(401);
+                chai.assert.isUndefined(res.body.token);
+                done()
+            });
+    });
+
+    it('will not return a JWT token when username is incorrect', (done) => {
+        testUser.password = testPassword;
+        chai.request(server)
+            .post('/api/auth')
+            .send({
+                username: "not" + testUser.username,
+                password: testPassword
+            })
+            .end((err, res) => {
+                res.should.have.status(401);
+                chai.assert.isUndefined(res.body.token);
+                done()
+            });
+    });
+
+    it('will not return a JWT token when username is missing', (done) => {
+        testUser.password = testPassword;
+        chai.request(server)
+            .post('/api/auth')
+            .send({
+                password: "not" + testPassword
+            })
+            .end((err, res) => {
+                res.should.have.status(401);
+                chai.assert.isUndefined(res.body.token);
+                done()
+            });
+    });
+
+    it('should ', function () {
+        
+    });
+    ('will not return a JWT token when password is missing', (done) => {
+        testUser.password = testPassword;
+        chai.request(server)
+            .post('/api/auth')
+            .send({
+                username: testUser.username
+            })
+            .end((err, res) => {
+                res.should.have.status(401);
+                chai.assert.isUndefined(res.body.token);
+                done()
+            });
+    });
 });
