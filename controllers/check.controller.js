@@ -57,7 +57,7 @@ module.exports = {
     },
 
     getAllChecks(req, res) {
-        Check.find({}, {sqlID: 0, isActive: 0, __v: 0})
+        Check.find({isActive: true}, {sqlID: 0, isActive: 0, __v: 0})
             .then(checks => {
                 res.status(200).json(checks)
             })

@@ -95,7 +95,7 @@ describe('Checks', () => {
             });
     });
 
-    it.only('can create a check with a 2 conditions', (done) => {
+    it('can create a check with a 2 conditions', (done) => {
         let check = {name: "Testing Check", description: "Check for testing", condition:  {MerchantAmount: {$gt: 200}, Status: "AUTHORIZED"} };
         let checkFromDatabase;
         chai.request(server)
