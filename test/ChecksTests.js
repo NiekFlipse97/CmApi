@@ -534,14 +534,13 @@ describe('Checks', () => {
                 res.should.have.status(204);
                 Check.find()
                     .then((checks) => {
-                        assert.strictEqual(checks.length, 0);
+                        assert.strictEqual(checks.length, 1);
 
-                        SQLConnection.executeSqlStatement("SELECT * FROM ControlChecks WHERE ID = " + testCheck.sqlID)
-                            .then((results) => {
-                                let checkFromSQLDb = results.recordset[0];
-                                chai.assert.isUndefined(checkFromSQLDb);
+                        Check.findById(testCheck._id)
+                            .then((checkFromDb) => {
+                                chai.assert.isNotTrue(checkFromDb.isActive);
                                 done();
-                            });
+                            })
                     })
             });
     });
@@ -555,17 +554,16 @@ describe('Checks', () => {
                     .then((checks) => {
                         assert.strictEqual(checks.length, 1);
 
-                        SQLConnection.executeSqlStatement("SELECT * FROM ControlChecks WHERE ID = " + testCheck.sqlID)
-                            .then((results) => {
-                                let checkFromSQLDb = results.recordset[0];
-                                chai.assert.isDefined(checkFromSQLDb);
+                        Check.findById(testCheck._id)
+                            .then((checkFromDb) => {
+                                chai.assert.isTrue(checkFromDb.isActive);
                                 done();
-                            });
+                            })
                     })
             });
     });
 
-    it('will not delete anything with ', (done) => {
+    it('will not delete anything with a incorrect id', (done) => {
         chai.request(server)
             .delete(`/api/checks/doesnotexist`)
             .set('X-Access-Token', JWT)
@@ -575,13 +573,12 @@ describe('Checks', () => {
                     .then((checks) => {
                         assert.strictEqual(checks.length, 1);
 
-                        SQLConnection.executeSqlStatement("SELECT * FROM ControlChecks WHERE ID = " + testCheck.sqlID)
-                            .then((results) => {
-                                let checkFromSQLDb = results.recordset[0];
-                                chai.assert.isDefined(checkFromSQLDb);
+                        Check.findById(testCheck._id)
+                            .then((checkFromDb) => {
+                                chai.assert.isTrue(checkFromDb.isActive);
                                 done();
-                            });
-                    });
+                            })
+                    })
             });
     });
 });

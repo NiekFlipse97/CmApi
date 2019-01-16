@@ -25,6 +25,10 @@ const CheckSchema = new Schema({
     sqlStatement: String,
     sqlID: {
         type: Number
+    },
+    isActive: {
+        type: Boolean,
+        default: true
     }
 });
 

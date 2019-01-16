@@ -92,10 +92,7 @@ describe('Authentication', () => {
             });
     });
 
-    it('should ', function () {
-        
-    });
-    ('will not return a JWT token when password is missing', (done) => {
+    it('will not return a JWT token when password is missing', (done) => {
         testUser.password = testPassword;
         chai.request(server)
             .post('/api/auth')

@@ -56,7 +56,7 @@ module.exports = {
     },
 
     getAllChecks(req, res) {
-        Check.find({})
+        Check.find({}, {sqlID: 0, isActive: 0, __v: 0})
             .then(checks => {
                 res.status(200).json(checks)
             })
@@ -68,10 +68,10 @@ module.exports = {
     getCheckById(req, res) {
         let id = req.params.id;
 
-        Check.findById(id)
+        Check.findById(id, {sqlID: 0, isActive: 0, __v: 0})
             .then(check => {
                 if(!check) throw new Errors.notFound();
-                res.status(200).json(check)
+                res.status(200).json(check);
             })
             .catch(error => {
                 let err = Errors.notFound();
@@ -154,15 +154,22 @@ module.exports = {
             .then((checkFromDb) => {
                 if(!checkFromDb) return res.status(404).send(Errors.notFound());
 
-                SQLConnection.executeSqlStatement("DELETE FROM ControlChecks WHERE ID = " + checkFromDb.sqlID)
-                    .then(() => {
-                        Check.findByIdAndDelete(id)
-                            .then(() => res.status(204).end())
-                            .catch((error) => {
-                                console.log(error);
-                                res.status(500).json(Errors.internalServerError());
-                            })
+                checkFromDb.isActive = false;
+                Check.findByIdAndUpdate(id, checkFromDb)
+                    .then(() => res.status(204).end())
+                    .catch((error) => {
+                        console.log(error);
+                        res.status(500).json(Errors.internalServerError());
                     })
+                // SQLConnection.executeSqlStatement("DELETE FROM ControlChecks WHERE ID = " + checkFromDb.sqlID)
+                //     .then(() => {
+                //         Check.findByIdAndDelete(id)
+                //             .then(() => res.status(204).end())
+                //             .catch((error) => {
+                //                 console.log(error);
+                //                 res.status(500).json(Errors.internalServerError());
+                //             })
+                //     })
             })
             .catch((error) => {
                 console.log(error);
