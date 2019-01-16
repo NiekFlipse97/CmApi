@@ -249,6 +249,30 @@ describe('Checks', () => {
             });
     });
 
+    it('will only get checks that are still active is true', (done) => {
+        let testCheck2 = new Check({name: "testName2", description: "testDescription2", condition: 'MerchantAmount: 0',
+            sqlStatement: 'SELECT "Payments".* FROM "Payments" WHERE "Payments"."MerchantAmount" = 0'});
+        let testCheck3 = new Check({name: "testName3", description: "testDescription3", condition: 'MerchantAmount: 0',
+            sqlStatement: 'SELECT "Payments".* FROM "Payments" WHERE "Payments"."MerchantAmount" = 0',
+            isActive: false});
+        testCheck2.save()
+            .then(() => testCheck3.save())
+            .then(() => {
+                chai.request(server)
+                    .get('/api/checks')
+                    .set('X-Access-token', JWT)
+                    .end((err, res) => {
+                        res.should.have.status(200);
+                        chai.assert.isNotNull(res.body);
+                        chai.expect(res.body).to.be.an('array');
+                        assert.strictEqual(res.body.length, 2);
+                        chai.assert.strictEqual(res.body[0].name, testCheck.name);
+                        chai.assert.strictEqual(res.body[1].name, testCheck2.name);
+                        done();
+                    });
+            });
+    });
+
     it('will not get checks without JWT', (done) => {
         chai.request(server)
             .get('/api/checks')

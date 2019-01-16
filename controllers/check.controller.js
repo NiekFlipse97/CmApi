@@ -12,7 +12,8 @@ const MongoSQL = require('mongo-sql');
 module.exports = {
     createCheck(req, res, next) {
         let check = new Check({
-            name: req.body.name, description: req.body.description,
+            name: req.body.name,
+            description: req.body.description,
             condition: JSON.stringify(req.body.condition)
         });
         let error = check.validateSync();
@@ -56,7 +57,7 @@ module.exports = {
     },
 
     getAllChecks(req, res) {
-        Check.find({}, {sqlID: 0, isActive: 0, __v: 0})
+        Check.find({isActive: true}, {sqlID: 0, isActive: 0, __v: 0})
             .then(checks => {
                 res.status(200).json(checks)
             })
@@ -84,7 +85,8 @@ module.exports = {
         if(!id) return res.status(400).json(new Error("Missing id", 400));
 
         let check = new Check({
-            name: req.body.name, description: req.body.description,
+            name: req.body.name,
+            description: req.body.description,
             condition: JSON.stringify(req.body.condition)
         });
         let error = check.validateSync();
