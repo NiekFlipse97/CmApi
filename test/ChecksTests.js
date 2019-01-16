@@ -95,6 +95,31 @@ describe('Checks', () => {
             });
     });
 
+    it.only('can create a check with a 2 conditions', (done) => {
+        let check = {name: "Testing Check", description: "Check for testing", condition:  {MerchantAmount: {$gt: 200}, Status: "AUTHORIZED"} };
+        let checkFromDatabase;
+        chai.request(server)
+            .post('/api/checks')
+            .send(check)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(200);
+
+                Check.findOne({name: check.name})
+                    .then((checkFromDb) => {
+                        checkFromDatabase = checkFromDb;
+                        chai.assert.isNotNull(checkFromDatabase);
+                        assert.strictEqual(checkFromDatabase.sqlStatement, 'select "payments".* from "payments" ' +
+                            'where "payments"."MerchantAmount" > 200 and "payments"."Status" = \'AUTHORIZED\'');
+                        return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
+                    })
+                    .then((results) => {
+                        assert.strictEqual(results.recordset[0].ID, checkFromDatabase.sqlID);
+                        done();
+                    });
+            });
+    });
+
     it('will not create a check without a JWT', (done) => {
         let check = {name: "Testing Check", description: "Check for testing", condition: {MerchantAmount: 200}};
 

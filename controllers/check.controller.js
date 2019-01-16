@@ -57,7 +57,7 @@ module.exports = {
     },
 
     getAllChecks(req, res) {
-        Check.find({isActive: true}, {sqlID: 0, isActive: 0, __v: 0})
+        Check.find({}, {sqlID: 0, isActive: 0, __v: 0})
             .then(checks => {
                 res.status(200).json(checks)
             })
@@ -194,9 +194,18 @@ let createQuery = (query) => {
     let values = query.values;
     let result = query.toString();
     for (let i = 0; i < values.length; i++) {
-        result = result.replace(`$${i + 1}`, `${values[i]}`);
+        let string = addQuotesIfString(values[i]);
+        result = result.replace(`$${i + 1}`, `${string}`);
     }
     return result;
+};
+
+let addQuotesIfString = function(value){
+    let stringObject = "test";
+    if(typeof value === typeof stringObject){
+        return '\'' + value + '\'';
+    }
+    else return value;
 };
 
 let createPreparedStatement = () => {
