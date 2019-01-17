@@ -239,7 +239,7 @@ describe('Checks', () => {
             });
     });
 
-    it('will not create a check with a condition refering to a nonexistent column', (done) => {
+    it('will not create a check with a condition referring to a nonexistent column', (done) => {
         let check = {name: "Testing Check", description: "Check for testing", condition: {NotExistentColumn: 500}};
 
         chai.request(server)
