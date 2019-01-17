@@ -10,7 +10,8 @@ function getAllChecks(){
     return new Promise((resolve, reject) => {
         Check.find()
             .then((checksFromDatabase) => {
-                checks = checksFromDatabase || [];
+                let tempChecks = checksFromDatabase || [];
+                checks = checks.filter((check) => check.isActive);
                 resolve();
             })
             .catch((error) => {
@@ -24,7 +25,6 @@ function getIdOfNewestPayment(){
     return new Promise(((resolve, reject) => {
         sqlDb.executeSqlStatement('SELECT TOP 1 ID FROM Payments ORDER BY ID DESC')
             .then((results) => {
-                //console.log(results.recordset[0].ID);
                 resolve(results.recordset[0].ID);
             })
             .catch((error) => {

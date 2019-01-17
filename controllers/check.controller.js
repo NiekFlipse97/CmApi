@@ -4,7 +4,7 @@ const Errors = require('../errorHandling/errorcodes');
 const SQLConnection = require('../databases/sqlDatabase');
 const sqlDbConnectionPool = require('../databases/sqlDatabase').connectionPool;
 const sql = require('mssql');
-const CheckExecutor = require('../checkExecutor/CheckExecutor');
+const Alert = require('../models/alert');
 const mongoose = require('mongoose');
 
 const MongoSQL = require('mongo-sql');
@@ -51,7 +51,7 @@ module.exports = {
                 });
             })
             .catch((error) => {
-                res.status(400).json(new Error("invalid condition", 400));
+                res.status(400).json(new Error("Invalid condition", 400));
                 if(error) console.log(error);
             });
     },
@@ -59,7 +59,7 @@ module.exports = {
     getAllChecks(req, res) {
         Check.find({isActive: true}, {sqlID: 0, isActive: 0, __v: 0})
             .then(checks => {
-                res.status(200).json(checks)
+                res.json(checks);
             })
             .catch(error => {
                 res.status(500).json(error)
@@ -69,10 +69,17 @@ module.exports = {
     getCheckById(req, res) {
         let id = req.params.id;
 
-        Check.findById(id, {sqlID: 0, isActive: 0, __v: 0})
+        Check.findById(id, {isActive: 0, __v: 0})
             .then(check => {
                 if(!check) throw new Errors.notFound();
-                res.status(200).json(check);
+
+                getAlertsOfControlCheck(check.sqlID)
+                    .then((alerts) => {
+                        let checkJSON = check.toJSON();
+                        checkJSON.alerts = alerts;
+                        delete checkJSON.sqlID;
+                        res.status(200).json(checkJSON);
+                });
             })
             .catch(error => {
                 let err = Errors.notFound();
@@ -262,11 +269,45 @@ let insertCheck = (check, res) => {
             check.save()
                 .then((checkDb) => {
                     result = checkDb;
-                    res.json(checkDb);
+                    res.status(201).json(checkDb);
                 })
                 .catch((err) => {
                     console.error(err);
                     res.status(500).json(Errors.internalServerError());
                 });
         })
+        .catch((error) => {
+            console.log(error);
+            res.status(500).json(Errors.internalServerError());
+        })
 };
+
+function getAlertsOfControlCheck(id){
+    return new Promise((resolve, reject) => {
+        let selectAlertsQuery = "SELECT Alerts.AlertCreatedOn, Payments.MerchantAmount, " +
+            "Orders.Currency, Payments.PaymentMethod, " +
+            "Merchants.name, Orders.BuyerName, " +
+            "Organizations.Name, Merchants.MerchantCategoryCode " +
+            "FROM Alerts " +
+            "JOIN Payments ON Alerts.PaymentID = Payments.ID " +
+            "JOIN Orders ON Payments.OrderId = Orders.ID " +
+            "JOIN Merchants ON Orders.MerchantID = Merchants.ID " +
+            "JOIN Organizations ON Merchants.OrganizationId = Organizations.ID " +
+            "WHERE Alerts.CheckNavID = " + id + ";";
+        SQLConnection.executeSqlStatement(selectAlertsQuery)
+            .then((results) => resolve(createAlertObjectOfQueryResults(results)))
+            .catch((error) => reject(error));
+    });
+}
+
+function createAlertObjectOfQueryResults(queryResults){
+    let resultAlertArray = [];
+    for(let alertJSON of queryResults.recordset){
+        console.log(alertJSON);
+        let alert = new Alert(alertJSON.AlertCreatedOn, alertJSON.MerchantAmount, alertJSON.Currency, alertJSON.PaymentMethod,
+                alertJSON.BuyerName,alertJSON.name, alertJSON.Name, alertJSON.MerchantCategoryCode);
+        console.log(alert);
+        resultAlertArray.push(alert);
+    }
+    return resultAlertArray;
+}
