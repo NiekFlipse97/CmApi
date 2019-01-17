@@ -53,7 +53,7 @@ describe('Checks', () => {
             .send(check)
             .set('X-Access-Token', JWT)
             .end((err, res) => {
-                res.should.have.status(200);
+                res.should.have.status(201);
 
                 Check.findOne({name: check.name})
                     .then((checkFromDb) => {
@@ -78,7 +78,7 @@ describe('Checks', () => {
             .send(check)
             .set('X-Access-Token', JWT)
             .end((err, res) => {
-                res.should.have.status(200);
+                res.should.have.status(201);
 
                 Check.findOne({name: check.name})
                     .then((checkFromDb) => {
@@ -103,7 +103,7 @@ describe('Checks', () => {
             .send(check)
             .set('X-Access-Token', JWT)
             .end((err, res) => {
-                res.should.have.status(200);
+                res.should.have.status(201);
 
                 Check.findOne({name: check.name})
                     .then((checkFromDb) => {
@@ -325,6 +325,17 @@ describe('Checks', () => {
                 chai.assert.isNotNull(res.body);
                 assert.strictEqual(res.body._id.toString(), testCheck._id.toString());
                 assert.strictEqual(res.body.name, testCheck.name);
+                done();
+            });
+    });
+
+    it('also gets alerts when retrieving control check by id', (done) => {
+        chai.request(server)
+            .get(`/api/checks/${testCheck._id}`)
+            .set('X-Access-Token', JWT)
+            .end((err, res) => {
+                res.should.have.status(200);
+                chai.assert.isDefined(res.body.alerts);
                 done();
             });
     });
@@ -575,7 +586,7 @@ describe('Checks', () => {
 
 
     /*****************      DELETE checks     **********************/
-    it('can delete a check', (done) => {
+    it('can disable  a check', (done) => {
         chai.request(server)
             .delete(`/api/checks/${testCheck._id}`)
             .set('X-Access-Token', JWT)
@@ -594,7 +605,7 @@ describe('Checks', () => {
             });
     });
 
-    it('will not delete a check without JWT', (done) => {
+    it('will not disable a check without JWT', (done) => {
         chai.request(server)
             .delete(`/api/checks/${testCheck._id}`)
             .end((err, res) => {
@@ -612,7 +623,7 @@ describe('Checks', () => {
             });
     });
 
-    it('will not delete anything with a incorrect id', (done) => {
+    it('will not disable anything with a incorrect id', (done) => {
         chai.request(server)
             .delete(`/api/checks/doesnotexist`)
             .set('X-Access-Token', JWT)

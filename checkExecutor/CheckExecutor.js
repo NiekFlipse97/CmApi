@@ -105,8 +105,6 @@ function getLastCheckedPaymentID(){
     return new Promise((resolve, reject) => {
         CheckExecutorConfig.findOne()
             .then((idObject) => {
-                //console.log(idObject);
-                //console.log("idObject paymentID: " + idObject.IDOfLastCheckedPayment);
                 idOfLastCheckedPayment = idObject.IDOfLastCheckedPayment;
                 resolve();
             })
@@ -119,7 +117,6 @@ function getLastCheckedPaymentID(){
 }
 
 function updateLastCheckedPaymentID(ID){
-    //console.log("ID: " + ID);
     CheckExecutorConfig.findOneAndUpdate({IDOfLastCheckedPayment: idOfLastCheckedPayment}, {IDOfLastCheckedPayment: ID})
         .catch((error) => {
             console.warn("Updating of lastCheckedPaymentID was unsuccessful");
