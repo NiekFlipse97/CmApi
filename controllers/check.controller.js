@@ -170,15 +170,6 @@ module.exports = {
                         console.log(error);
                         res.status(500).json(Errors.internalServerError());
                     })
-                // SQLConnection.executeSqlStatement("DELETE FROM ControlChecks WHERE ID = " + checkFromDb.sqlID)
-                //     .then(() => {
-                //         Check.findByIdAndDelete(id)
-                //             .then(() => res.status(204).end())
-                //             .catch((error) => {
-                //                 console.log(error);
-                //                 res.status(500).json(Errors.internalServerError());
-                //             })
-                //     })
             })
             .catch((error) => {
                 console.log(error);
