@@ -195,7 +195,7 @@ let createQuery = (query) => {
         let string = addQuotesIfString(values[i]);
         result = result.replace(`$${i + 1}`, `${string}`);
     }
-    return result;
+    return addJointToSqlQuery(result);
 };
 
 let addQuotesIfString = function(value){
@@ -301,4 +301,12 @@ function createAlertObjectOfQueryResults(queryResults){
         resultAlertArray.push(alert);
     }
     return resultAlertArray;
+}
+
+function addJointToSqlQuery(sqlStatement){
+    let joinsString = "FROM Payments " +
+        "JOIN Orders ON Payments.OrderId = Orders.ID " +
+        "JOIN Merchants ON Orders.MerchantID = Merchants.ID " +
+        "JOIN Organizations ON Merchants.OrganizationId = Organizations.ID ";
+    return sqlStatement.replace(`from "payments" `, joinsString);
 }
