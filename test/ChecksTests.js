@@ -59,10 +59,7 @@ describe('Checks', () => {
                     .then((checkFromDb) => {
                         checkFromDatabase = checkFromDb;
                         chai.assert.isNotNull(checkFromDatabase);
-                        assert.strictEqual(checkFromDatabase.sqlStatement, 'select "payments".* FROM Payments ' +
-                        'JOIN Orders ON Payments.OrderId = Orders.ID ' +
-                        'JOIN Merchants ON Orders.MerchantID = Merchants.ID ' +
-                        'JOIN Organizations ON Merchants.OrganizationId = Organizations.ID ' +
+                        assert.strictEqual(checkFromDatabase.sqlStatement, 'select "payments".* from "payments" ' +
                             'where "payments"."MerchantAmount" = 200');
                         return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
                     })
@@ -87,10 +84,7 @@ describe('Checks', () => {
                     .then((checkFromDb) => {
                         checkFromDatabase = checkFromDb;
                         chai.assert.isNotNull(checkFromDatabase);
-                        assert.strictEqual(checkFromDatabase.sqlStatement, 'select "payments".* FROM Payments ' +
-                            'JOIN Orders ON Payments.OrderId = Orders.ID ' +
-                            'JOIN Merchants ON Orders.MerchantID = Merchants.ID ' +
-                            'JOIN Organizations ON Merchants.OrganizationId = Organizations.ID ' +
+                        assert.strictEqual(checkFromDatabase.sqlStatement, 'select "payments".* from "payments" ' +
                             'where "payments"."MerchantAmount" > 200');
                         return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
                     })
@@ -115,10 +109,7 @@ describe('Checks', () => {
                     .then((checkFromDb) => {
                         checkFromDatabase = checkFromDb;
                         chai.assert.isNotNull(checkFromDatabase);
-                        assert.strictEqual(checkFromDatabase.sqlStatement, 'select "payments".* FROM Payments ' +
-                            'JOIN Orders ON Payments.OrderId = Orders.ID ' +
-                            'JOIN Merchants ON Orders.MerchantID = Merchants.ID ' +
-                            'JOIN Organizations ON Merchants.OrganizationId = Organizations.ID ' +
+                        assert.strictEqual(checkFromDatabase.sqlStatement, 'select "payments".* from "payments" ' +
                             'where "payments"."MerchantAmount" > 200 and "payments"."Status" = \'AUTHORIZED\'');
                         return SQLConnection.executeSqlStatement("SELECT TOP 1 ID FROM ControlChecks ORDER BY ID DESC;");
                     })
@@ -376,10 +367,7 @@ describe('Checks', () => {
                         assert.strictEqual(checkFromDb.name, check.name);
                         assert.strictEqual(checkFromDb.description, check.description);
                         assert.strictEqual(JSON.parse(checkFromDb.condition), JSON.stringify(check.condition));
-                        assert.strictEqual(checkFromDb.sqlStatement, 'select "payments".* FROM Payments ' +
-                            'JOIN Orders ON Payments.OrderId = Orders.ID ' +
-                            'JOIN Merchants ON Orders.MerchantID = Merchants.ID ' +
-                            'JOIN Organizations ON Merchants.OrganizationId = Organizations.ID ' +
+                        assert.strictEqual(checkFromDb.sqlStatement, 'select "payments".* from "payments" ' +
                             'where "payments"."MerchantAmount" = 300');
 
                         SQLConnection.executeSqlStatement("SELECT * FROM ControlChecks WHERE ID = " + checkFromDb.sqlID)
