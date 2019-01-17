@@ -11,7 +11,7 @@ function getAllChecks(){
         Check.find()
             .then((checksFromDatabase) => {
                 let tempChecks = checksFromDatabase || [];
-                checks = checks.filter((check) => check.isActive);
+                checks = tempChecks.filter((check) => check.isActive);
                 resolve();
             })
             .catch((error) => {
@@ -42,26 +42,23 @@ async function executeChecks() {
     let idOfNewestPayment = await getIdOfNewestPayment();
 
     for(let check of checks){
-        let sqlStatement = check.sqlStatement + ' AND "Payments"."id" > ' + idOfLastCheckedPayment +
-            ' AND "Payments"."id" <= ' + idOfNewestPayment + ';';
+        let sqlStatement = `${check.sqlStatement} AND "Payments"."id" > ${idOfLastCheckedPayment} AND 
+            "Payments"."id" <= ${idOfNewestPayment};`;
+
         sqlDb.executeSqlStatement(sqlStatement)
-            .then((results) => {
-                createAlertsForAllFailedChecks(results.recordset, check.sqlID)
-            })
+            .then((results) => createAlertsForFailedCheck(results.recordset, check.sqlID))
             .catch((error) => logCheckError(error));
     }
     updateLastCheckedPaymentID(idOfNewestPayment);
 }
 
-function createAlertsForAllFailedChecks(paymentsThatFailedCheck, checkID){
+function createAlertsForFailedCheck(paymentsThatFailedCheck, checkID){
     for(let payment of paymentsThatFailedCheck){
-        //console.log(payment);
         createAlert(payment.ID, checkID);
     }
 }
 
 function createAlert(paymentID, checkID){
-    //console.log(paymentID);
     let alert = {
         ID: null,
         CheckID: checkID,
@@ -80,7 +77,6 @@ function saveAlert(alert){
         preparedStatement.prepare('INSERT INTO Alerts (CheckNavID, PaymentID, Resolved, AlertCreatedOn) ' +
             'VALUES (@CheckID, @PaymentID, @Resolved, @AlertCreatedOn);')
             .then((prepResults) => {
-                //console.log(prepResults);
                 return preparedStatement.execute(alert)
             })
             .then((result) => {
